@@ -1,0 +1,34 @@
+desa;suhu;curah_hujan;kelembapan;jenis_tanah;tekstur_tanah;ph;kemiringan;topografi
+Kota Uneng;23.5;1023.5;62.5;['mediteran'];['lempung berpasir', 'bedebu'];6.75;2.0;37.5
+Nangalimang;23.5;1023.5;62.5;['mediteran'];['lempung berpasir', 'bedebu'];6.75;2.0;50.0
+Wuring;23.5;1023.5;62.5;['mediteran'];['liat berpasir', 'lempung bedebu'];5.1;35.5;250.0
+Wolomarang;23.5;1023.5;62.5;['mediteran'];['liat berpasir', 'lempung bedebu'];5.1;35.5;250.0
+Tilang;28.0;1725.0;80.0;['regosol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];5.1;27.0;500.0
+Lusitada;28.0;1725.0;80.0;['regosol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];5.1;27.0;500.0
+Bloro;28.0;1725.0;80.0;['regosol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];5.1;27.0;500.0
+Tebuk;28.0;1725.0;80.0;['regosol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];5.1;11.0;500.0
+Nita;28.0;1725.0;80.0;['regosol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];5.1;11.0;500.0
+Takaplager;28.0;1725.0;80.0;['regosol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];5.1;27.0;500.0
+Nitakloang;28.0;1725.0;80.0;['regosol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];5.1;27.0;500.0
+Wuliwutik;28.0;1725.0;80.0;['regosol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];5.1;49.5;500.0
+Ladogahar;28.0;1725.0;80.0;['regosol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];5.1;49.5;500.0
+Riit;28.0;1725.0;80.0;['regosol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];5.1;80.5;500.0
+Nirangkliung;28.0;1725.0;80.0;['regosol', 'litosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];5.1;49.5;500.0
+Mahebora;28.0;1725.0;80.0;['regosol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];5.1;60.0;500.0
+Paubekor;23.5;2053.5;82.0;['regosol', 'latosol'];['lempung  bedebu'];5.75;23.5;125.0
+Koting A;23.5;2053.5;82.0;['regosol', 'latosol'];['lempung  bedebu'];5.75;11.0;100.0
+Koting B;23.5;2053.5;82.0;['regosol', 'latosol'];['lempung  bedebu'];5.1;11.0;110.0
+Koting C;23.5;2053.5;82.0;['regosol', 'latosol'];['lempung  bedebu'];5.75;27.0;120.0
+Korowuwu;29.0;1553.0;70.0;['aluvial'];['lempung berpasir', 'lempung bedebu'];5.5;4.0;70.0
+Kolidetung;29.0;1553.0;70.0;['aluvial'];['lempung berpasir', 'lempung bedebu'];5.5;4.0;42.5
+Peli baler;23.5;10545.0;62.5;['regusol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];6.5;20.0;375.0
+Wolomotong;23.5;10545.0;62.5;['regusol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];6.5;20.0;375.0
+Kloangpopot;23.5;10545.0;62.5;['regusol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];6.5;20.0;375.0
+Watumerak;23.5;10545.0;62.5;['regusol', 'latosol', 'grumosol'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];6.5;20.0;375.0
+Nebe;27.5;1023.5;65.0;['grumosol'];['lempung berpasir', 'liat'];6.75;1.5;125.0
+Bangkoor;27.5;1023.5;65.0;['grumosol'];['lempung berpasir', 'liat'];6.75;1.5;125.0
+Talibura;27.5;1023.5;65.0;['grumosol'];['lempung berpasir', 'liat'];6.75;6.0;125.0
+Nangahale;27.5;1023.5;65.0;['grumosol'];['lempung berpasir', 'liat'];6.75;1.5;125.0
+Kolisia;23.5;1143.5;65.0;['latosol', 'aluvial'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];6.75;30.0;500.0
+Kolisia B;23.5;1143.5;65.0;['latosol', 'aluvial'];['liat', 'liat berpasir', 'lempung berpasir', 'lempung bedebu'];6.75;30.0;500.0
+Wairbeler;28.0;721.0;70.0;['grumosol'];['liat berpasir'];6.5;11.0;500.0
