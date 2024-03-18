@@ -45,7 +45,11 @@ def insert_tanaman(
 
 def read_tanaman(db: Session):
     tanamans =  ctanaman.read_tanaman(db)
-    # logger.info(tanamans)
-    df_tanaman = pd.DataFrame.from_dict(tanamans)
-    
-    return df_tanaman
+
+    if tanamans:
+        # logger.info(tanamans)
+        df_tanaman = pd.DataFrame.from_dict(tanamans)
+        
+        return df_tanaman
+
+    return None

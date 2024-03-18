@@ -27,7 +27,7 @@ with tab1:
     with st.expander("Form input", expanded=False):
         with st.form("form", border=False, clear_on_submit=True):
             # create input fields
-            nama_tanaman = st.text_input("Nama Tanaman", placeholder="ex: Bawang Merah")
+            nama_tanaman = st.text_input("Jenis Tanaman", placeholder="ex: Bawang Merah")
             st.write("**Suhu**")
             suhu_ideal = st.text_input("Suhu Ideal")
             suhu_batas_interpolasi = st.text_input("Batas Interpolasi Suhu")

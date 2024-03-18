@@ -11,6 +11,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(name)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
