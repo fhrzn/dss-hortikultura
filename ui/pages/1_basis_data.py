@@ -2,6 +2,7 @@ import streamlit as st
 from controller import tanaman
 import logging
 from utils import dbutils
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
@@ -24,54 +25,80 @@ tab1, tab2 = st.tabs(["🌱 Profil Ideal Tanaman", "🪨 Profil Kondisi Lahan"])
 
 with tab1:
     # CREATE
-    with st.expander("Form input", expanded=False):
+    with st.expander("Input Tanaman Baru", expanded=False):
         with st.form("form", border=False, clear_on_submit=True):
             # create input fields
-            nama_tanaman = st.text_input("Nama Tanaman", placeholder="ex: Bawang Merah")
+            jenis_tanaman = st.text_input("Jenis Tanaman", placeholder="ex: Bawang Merah")
             st.write("**Suhu**")
-            suhu_ideal = st.text_input("Suhu Ideal")
-            suhu_batas_interpolasi = st.text_input("Batas Interpolasi Suhu")
+            suhu = st.text_input("Suhu Ideal", placeholder="ex: 10-30")
+            suhu_interpolasi = st.text_input("Batas Interpolasi Suhu", placeholder="ex: 0,25,32,57")
             st.write("**Curah Hujan**")
-            curah_hujan_ideal = st.text_input("Curah Hujan Ideal")
-            curah_hujan_batas_interpolasi = st.text_input("Batas Interpolasi Curah Hujan")
-            st.write("**Kelembaban**")
-            kelembaban_ideal = st.text_input("Kelembaban Ideal")
-            kelembaban_batas_interpolasi = st.text_input("Batas Interpolasi Kelembaban")
+            curah_hujan = st.text_input("Curah Hujan Ideal", placeholder="ex: 350-800")
+            curah_hujan_interpolasi = st.text_input("Batas Interpolasi Curah Hujan", placeholder="ex: 0,300,2500,2800")
+            st.write("**Kelembapan**")
+            kelembapan = st.text_input("Kelembapan Ideal", placeholder="ex: 80-90")
+            kelembapan_interpolasi = st.text_input("Batas Interpolasi Kelembapan", placeholder="ex: 0,80,90,170")
+            st.write("**Jenis Tanah**")
+            jenis_tanah = st.multiselect("Jenis Tanah", ["mediteran", "regosol", "latosol", "grumosol", "aluvial"])
+            st.write("**Tekstur Tanah**")
+            tekstur_tanah = st.multiselect("Tekstur Tanah", ["berdebu", "liat", "liat berpasir", "liat berdebu" "lempung berpasir", "lempung berdebu"])
             st.write("**pH**")
-            ph_ideal = st.text_input("pH Ideal")
-            ph_batas_interpolasi = st.text_input("Batas Interpolasi pH")
+            ph = st.text_input("pH Ideal", placeholder="ex: 6-8")
+            ph_interpolasi = st.text_input("Batas Interpolasi pH", placeholder="ex: 0,5.6,6.5,12.1")
             st.write("**Kemiringan**")
-            kemiringan_ideal = st.text_input("Kemiringan Ideal")
-            kemiringan_batas_interpolasi = st.text_input("Batas Interpolasi Kemiringan")
+            kemiringan = st.text_input("Kemiringan Ideal", placeholder="ex: 5.5-16")
+            kemiringan_interpolasi = st.text_input("Batas Interpolasi Kemiringan", placeholder="ex: 0,30,60")
             st.write("**Topografi**")
-            topografi_ideal = st.text_input("Topografi Ideal")
-            topografi_batas_interpolasi = st.text_input("Batas Interpolasi Topografi")
+            topografi = st.text_input("Topografi Ideal", placeholder="ex: 700-1000")
+            topografi_interpolasi = st.text_input("Batas Interpolasi Topografi", placeholder="ex: 0,700,1000,1700")
 
             # submit btn
             submit = st.form_submit_button("Submit Data")
             if submit:
                 tanaman.insert_tanaman(
                     db=st.session_state["db"],
-                    nama_tanaman=nama_tanaman,
-                    suhu_ideal=suhu_ideal,
-                    suhu_batas_interpolasi=suhu_batas_interpolasi,
-                    curah_hujan_ideal=curah_hujan_ideal,
-                    curah_hujan_batas_interpolasi=curah_hujan_batas_interpolasi,
-                    kelembaban_ideal=kelembaban_ideal,
-                    kelembaban_batas_interpolasi=kelembaban_batas_interpolasi,
-                    ph_ideal=ph_ideal,
-                    ph_batas_interpolasi=ph_batas_interpolasi,
-                    kemiringan_ideal=kemiringan_ideal,
-                    kemiringan_batas_interpolasi=kemiringan_batas_interpolasi,
-                    topografi_ideal=topografi_ideal,
-                    topografi_batas_interpolasi=topografi_batas_interpolasi
+                    jenis_tanaman=jenis_tanaman,
+                    suhu=suhu,
+                    suhu_interpolasi=suhu_interpolasi,
+                    curah_hujan=curah_hujan,
+                    curah_hujan_interpolasi=curah_hujan_interpolasi,
+                    kelembapan=kelembapan,
+                    kelembapan_interpolasi=kelembapan_interpolasi,
+                    jenis_tanah=", ".join(jenis_tanah),
+                    tekstur_tanah=", ".join(tekstur_tanah),
+                    ph=ph,
+                    ph_interpolasi=ph_interpolasi,
+                    kemiringan=kemiringan,
+                    kemiringan_interpolasi=kemiringan_interpolasi,
+                    topografi=topografi,
+                    topografi_interpolasi=topografi_interpolasi,
                 )
 
     # READ
     with st.expander("Data Tanaman", expanded=True):
-        st.empty()
         tanamans = tanaman.read_tanaman(db=st.session_state["db"])
         st.dataframe(tanamans)
+    
+    # READ
+    with st.expander("Update Data Tanaman", expanded=False):
+        with st.form("form_update", border=False, clear_on_submit=True):
+            st.write("**ID Tanaman**")
+            id_tanaman = st.number_input("ID Tanaman", min_value=0, value=None)
+
+
+            submit_update = st.form_submit_button("Update")
+            if submit_update:
+                tanaman.delete_tanaman(db=st.session_state["db"], id=id_tanaman)
+    
+    # DELETEs
+    with st.expander("Hapus Tanaman", expanded=False):
+        with st.form("form_delete", border=False, clear_on_submit=True):
+            st.write("**ID Tanaman**")
+            id_tanaman = st.number_input("ID Tanaman", min_value=0, value=None)
+
+            submit_delete = st.form_submit_button("Hapus")
+            if submit_delete:
+                tanaman.delete_tanaman(db=st.session_state["db"], id=id_tanaman)
         
 
 
