@@ -10,34 +10,38 @@ logger = logging.getLogger(__name__)
 
 def insert_tanaman(
     db: Session,
-    nama_tanaman: str,
-    suhu_ideal: str,
-    suhu_batas_interpolasi: str,
-    curah_hujan_ideal: str,
-    curah_hujan_batas_interpolasi: str,
-    kelembaban_ideal: str,
-    kelembaban_batas_interpolasi: str,
-    ph_ideal: str,
-    ph_batas_interpolasi: str,
-    kemiringan_ideal: str,
-    kemiringan_batas_interpolasi: str,
-    topografi_ideal: str,
-    topografi_batas_interpolasi: str,
+    jenis_tanaman: str,
+    suhu: str,
+    suhu_interpolasi: str,
+    curah_hujan: str,
+    curah_hujan_interpolasi: str,
+    kelembapan: str,
+    kelembapan_interpolasi: str,
+    jenis_tanah: str,
+    tekstur_tanah: str,
+    ph: str,
+    ph_interpolasi: str,
+    kemiringan: str,
+    kemiringan_interpolasi: str,
+    topografi: str,
+    topografi_interpolasi: str,
 ):
     tanaman = Tanaman(
-        nama_tanaman=nama_tanaman,
-        suhu_ideal=suhu_ideal,
-        suhu_batas_interpolasi=suhu_batas_interpolasi,
-        curah_hujan_ideal=curah_hujan_ideal,
-        curah_hujan_batas_interpolasi=curah_hujan_batas_interpolasi,
-        kelembaban_ideal=kelembaban_ideal,
-        kelembaban_batas_interpolasi=kelembaban_batas_interpolasi,
-        ph_ideal=ph_ideal,
-        ph_batas_interpolasi=ph_batas_interpolasi,
-        kemiringan_ideal=kemiringan_ideal,
-        kemiringan_batas_interpolasi=kemiringan_batas_interpolasi,
-        topografi_ideal=topografi_ideal,
-        topografi_batas_interpolasi=topografi_batas_interpolasi
+        jenis_tanaman=jenis_tanaman,
+        suhu=suhu,
+        suhu_interpolasi=suhu_interpolasi,
+        curah_hujan=curah_hujan,
+        curah_hujan_interpolasi=curah_hujan_interpolasi,
+        kelembapan=kelembapan,
+        kelembapan_interpolasi=kelembapan_interpolasi,
+        jenis_tanah=jenis_tanah,
+        tekstur_tanah=tekstur_tanah,
+        ph=ph,
+        ph_interpolasi=ph_interpolasi,
+        kemiringan=kemiringan,
+        kemiringan_interpolasi=kemiringan_interpolasi,
+        topografi=topografi,
+        topografi_interpolasi=topografi_interpolasi,
     )
 
     ctanaman.insert_tanaman(db, tanaman)
@@ -53,3 +57,7 @@ def read_tanaman(db: Session):
         return df_tanaman
 
     return None
+
+
+def delete_tanaman(db: Session, id: int):
+    ctanaman.delete_tanaman(db, id)

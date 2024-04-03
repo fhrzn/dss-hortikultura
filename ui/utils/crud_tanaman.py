@@ -22,3 +22,13 @@ def read_tanaman(db: Session):
         return dbutils.sqlalchemy_to_dict(query.all())
     except Exception as e:
         logger.error(str(e))
+
+
+def delete_tanaman(db: Session, id: int):
+    try:
+        tanaman = db.query(Tanaman).where(Tanaman.id == id).first()
+        
+        db.delete(tanaman)
+        db.commit()
+    except Exception as e:
+        logger.error(str(e))
