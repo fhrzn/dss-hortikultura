@@ -1,5 +1,5 @@
 import streamlit as st
-from controller import tanaman
+from controller import tanaman, lahan
 import logging
 from utils import dbutils
 from sqlalchemy.orm import Session
@@ -104,6 +104,49 @@ with tab1:
 
 with tab2:
     # TODO: CRUD profil kondisi lahan
-    pass
+    # CREATE
+    with st.expander("Input Data Lahan Baru", expanded=False):
+        with st.form("lahan_form", border=False, clear_on_submit=True):
+            # create input fields
+            lahan_kota = st.text_input("Kota", placeholder="ex: Bawang Merah")
+            lahan_suhu = st.text_input("Suhu", placeholder="ex: 10")
+            lahan_curah_hujan = st.text_input("Curah Hujan", placeholder="ex: 350")
+            lahan_kelembapan = st.text_input("Kelembapan", placeholder="ex: 80")
+            lahan_jenis_tanah = st.selectbox("Jenis Tanah", ("mediteran", "regosol", "latosol", "grumosol", "aluvial"))
+            lahan_tekstur_tanah = st.selectbox("Tekstur Tanah", ("liat", "liat berpasir", "lempung berpasir sangat halus", "lempung berdebu"))
+            lahan_ph = st.text_input("pH", placeholder="ex: 6")
+            lahan_kemiringan = st.text_input("Kemiringan", placeholder="ex: 5.5")
+            lahan_topografi = st.text_input("Topografi", placeholder="ex: 700")
+
+            # submit btn
+            lahan_submit = st.form_submit_button("Submit Data")
+            if lahan_submit:
+                pass
+
+    # READ
+    with st.expander("Data Lahan", expanded=True):
+        tanamans = lahan.read_lahan(db=st.session_state["db"])
+        st.dataframe(tanamans)
+    
+    # UPDATE
+    with st.expander("Update Data Lahan", expanded=False):
+        with st.form("lahan_form_update", border=False, clear_on_submit=True):
+            st.write("**ID Lahan**")
+            id_tanaman = st.number_input("ID Lahan", min_value=0, value=None)
+
+
+            submit_update = st.form_submit_button("Update")
+            if submit_update:
+                tanaman.delete_tanaman(db=st.session_state["db"], id=id_tanaman)
+    
+    # DELETEs
+    with st.expander("Hapus Lahan", expanded=False):
+        with st.form("lahan_form_delete", border=False, clear_on_submit=True):
+            st.write("**ID Lahan**")
+            id_lahan = st.number_input("ID Lahan", min_value=0, value=None)
+
+            submit_delete = st.form_submit_button("Hapus")
+            if submit_delete:
+                lahan.delete_lahan(db=st.session_state["db"], id=id_lahan)
 
     
