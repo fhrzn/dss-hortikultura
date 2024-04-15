@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, Double
 
 Base = declarative_base()
 
@@ -30,11 +30,11 @@ class Lahan(Base):
 
     id = Column(Integer, index=True, primary_key=True, autoincrement=True)
     desa = Column(String)
-    suhu = Column(String)
-    curah_hujan = Column(String)
-    kelembapan = Column(String)
+    suhu = Column(Double)
+    curah_hujan = Column(Double)
+    kelembapan = Column(Double)
     jenis_tanah = Column(String)
     tekstur_tanah = Column(String)
-    ph = Column(String)
-    kemiringan = Column(String)
-    topografi = Column(String)
+    ph = Column(Double)
+    kemiringan = Column(Double)
+    topografi = Column(Double)
