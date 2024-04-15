@@ -24,3 +24,17 @@ class Tanaman(Base):
     topografi = Column(String)
     topografi_interpolasi = Column(String)
 
+
+class Lahan(Base):
+    __tablename__ = "lahan"
+
+    id = Column(Integer, index=True, primary_key=True, autoincrement=True)
+    desa = Column(String)
+    suhu = Column(String)
+    curah_hujan = Column(String)
+    kelembapan = Column(String)
+    jenis_tanah = Column(String)
+    tekstur_tanah = Column(String)
+    ph = Column(String)
+    kemiringan = Column(String)
+    topografi = Column(String)

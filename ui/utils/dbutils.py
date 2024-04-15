@@ -33,6 +33,7 @@ def execute_seeds(db: Session):
         if '.sql' in seed:
             with open(os.path.join(os.getenv("SEED_DIR"), seed), 'r', encoding='utf-8') as f:
                 try:
+                    logger.info(f"Found {seed}")
                     queries = f.readlines()
                     for q in queries:
                         db.execute(text(q))
