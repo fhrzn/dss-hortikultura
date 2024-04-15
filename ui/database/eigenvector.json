@@ -1,0 +1,43 @@
+{
+    "eigenvector": {
+        "kriteria": {
+            "iklim": 0.493,
+            "tanah": 0.311,
+            "topografi" : 0.196
+        },
+        "sub_kriteria_iklim": {
+            "suhu" :0.527,
+            "curah_hujan":0.332,
+            "kelembapan":0.139
+        },
+        "sub_kriteria_tanah": {
+            "jenis_tanah" : 0.409,
+            "tekstur_tanah": 0.32,
+            "ph": 0.151,
+            "kemiringan":0.118
+        },
+        "ahp_jenis_tanah": {
+            "latosol" :0.207,
+            "regosol" :0.117,
+            "gambut" :0.159,
+            "grumosol" :0.119,
+            "humus" :0.093,
+            "aluvial" :0.08,
+            "rendzina" :0.062,
+            "litosol" :0.053,
+            "mediteran":0.046
+        },
+        "ahp_tekstur_tanah": {
+            "liat berpasir" : 0.182,
+            "liat" : 0.159,
+            "liat berdebu" : 0.138,
+            "lempung berliat" : 0.12,
+            "lempung liat berpasir" : 0.105,
+            "lempung liat berdebu" :0.091,
+            "lempung berpasir sangat halus" :0.079,
+            "lempung" :0.05,
+            "lempung berdebu" :0.04,
+            "debu" :0.032
+        }
+    }
+}

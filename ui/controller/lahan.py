@@ -35,14 +35,16 @@ def insert_lahan(
     clahan.insert_lahan(db, lahan)
 
 
-def read_lahan(db: Session):
+def read_lahan(db: Session, return_dict: bool = True):
     lahans =  clahan.read_lahan(db)
 
     if lahans:
-        # logger.info(lahans)
-        df_lahan = pd.DataFrame.from_dict(lahans)
+        if return_dict:
+            df_lahan = pd.DataFrame.from_dict(lahans)
+            return df_lahan
         
-        return df_lahan
+        return lahans
+        
 
     return None
 

@@ -125,19 +125,19 @@ with tab2:
 
     # READ
     with st.expander("Data Lahan", expanded=True):
-        tanamans = lahan.read_lahan(db=st.session_state["db"])
-        st.dataframe(tanamans)
+        lahans = lahan.read_lahan(db=st.session_state["db"])
+        st.dataframe(lahans)
     
     # UPDATE
     with st.expander("Update Data Lahan", expanded=False):
         with st.form("lahan_form_update", border=False, clear_on_submit=True):
             st.write("**ID Lahan**")
-            id_tanaman = st.number_input("ID Lahan", min_value=0, value=None)
+            id_lahan = st.number_input("ID Lahan", min_value=0, value=None)
 
 
             submit_update = st.form_submit_button("Update")
             if submit_update:
-                tanaman.delete_tanaman(db=st.session_state["db"], id=id_tanaman)
+                lahan.delete_lahan(db=st.session_state["db"], id=id_tanaman)
     
     # DELETEs
     with st.expander("Hapus Lahan", expanded=False):
