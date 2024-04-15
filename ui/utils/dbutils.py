@@ -20,7 +20,7 @@ def init_db():
         db = session()
 
         # check db availability
-        if not os.path.exists(os.getenv("SQLITE_URL")):
+        if not os.path.exists(os.getenv("DB_PATH")):
             model.Base.metadata.create_all(engine)
             execute_seeds(db)
         
