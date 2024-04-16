@@ -80,15 +80,15 @@ with tab1:
         st.dataframe(tanamans)
     
     # READ
-    with st.expander("Update Data Tanaman", expanded=False):
-        with st.form("form_update", border=False, clear_on_submit=True):
-            st.write("**ID Tanaman**")
-            id_tanaman = st.number_input("ID Tanaman", min_value=0, value=None)
+    # with st.expander("Update Data Tanaman", expanded=False):
+    #     with st.form("form_update", border=False, clear_on_submit=True):
+    #         st.write("**ID Tanaman**")
+    #         id_tanaman = st.number_input("ID Tanaman", min_value=0, value=None)
 
 
-            submit_update = st.form_submit_button("Update")
-            if submit_update:
-                tanaman.delete_tanaman(db=st.session_state["db"], id=id_tanaman)
+    #         submit_update = st.form_submit_button("Update")
+    #         if submit_update:
+    #             tanaman.delete_tanaman(db=st.session_state["db"], id=id_tanaman)
     
     # DELETEs
     with st.expander("Hapus Tanaman", expanded=False):
@@ -129,15 +129,15 @@ with tab2:
         st.dataframe(lahans)
     
     # UPDATE
-    with st.expander("Update Data Lahan", expanded=False):
-        with st.form("lahan_form_update", border=False, clear_on_submit=True):
-            st.write("**ID Lahan**")
-            id_lahan = st.number_input("ID Lahan", min_value=0, value=None)
+    # with st.expander("Update Data Lahan", expanded=False):
+    #     with st.form("lahan_form_update", border=False, clear_on_submit=True):
+    #         st.write("**ID Lahan**")
+    #         id_lahan = st.number_input("ID Lahan", min_value=0, value=None)
 
 
-            submit_update = st.form_submit_button("Update")
-            if submit_update:
-                lahan.delete_lahan(db=st.session_state["db"], id=id_tanaman)
+    #         submit_update = st.form_submit_button("Update")
+    #         if submit_update:
+    #             lahan.delete_lahan(db=st.session_state["db"], id=id_tanaman)
     
     # DELETEs
     with st.expander("Hapus Lahan", expanded=False):

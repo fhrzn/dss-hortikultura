@@ -33,32 +33,81 @@ lahans = lahan.read_lahan(db=st.session_state["db"], return_dict=False)
 tanamans = tanaman.read_tanaman(db=st.session_state["db"], return_dict=False)
 
 selected_kota = None
+do_calculation = False
 
 st.subheader("Step 1 - Pilih Kota")
 with st.expander("Pilih Kota/Desa tempat Lahan", expanded=True):
     kotas = [l['desa'] for l in lahans]
     kota_lahan = st.selectbox("Daftar Kota/Desa", kotas, index=None)
 
-    if kota_lahan:
-        selected_kota = [l for l in lahans if l['desa'] == kota_lahan][0]
+    with st.form("dss_form", border=False, clear_on_submit=False):
+        if kota_lahan:
+            selected_kota = [l for l in lahans if l['desa'] == kota_lahan][0]
         # TODO: add catch when selected kota is empty
         # st.write(selected_kota)
 
-        lahan_kota = st.text_input("Kota", disabled=True, value=selected_kota["desa"])
-        lahan_suhu = st.text_input("Suhu", disabled=True, value=selected_kota["suhu"])
-        lahan_curah_hujan = st.text_input("Curah Hujan", disabled=True, value=selected_kota["curah_hujan"])
-        lahan_kelembapan = st.text_input("Kelembapan", disabled=True, value=selected_kota["kelembapan"])
-        lahan_jenis_tanah = st.text_input("Jenis Tanah", disabled=True, value=selected_kota["jenis_tanah"])
-        lahan_tekstur_tanah = st.text_input("Tekstur Tanah", disabled=True, value=selected_kota["tekstur_tanah"])
-        lahan_ph = st.text_input("pH", disabled=True, value=selected_kota["ph"])
-        lahan_kemiringan = st.text_input("Kemiringan", disabled=True, value=selected_kota["kemiringan"])
-        lahan_topografi = st.text_input("Topografi", disabled=True, value=selected_kota["topografi"])
+        lahan_kota = st.text_input("Kota", disabled=True if kota_lahan else False, value=selected_kota["desa"] if kota_lahan else None)
+        lahan_suhu = st.text_input("Suhu", disabled=True if kota_lahan else False, value=selected_kota["suhu"] if kota_lahan else None)
+        lahan_curah_hujan = st.text_input("Curah Hujan", disabled=True if kota_lahan else False, value=selected_kota["curah_hujan"] if kota_lahan else None)
+        lahan_kelembapan = st.text_input("Kelembapan", disabled=True if kota_lahan else False, value=selected_kota["kelembapan"] if kota_lahan else None)
+        if kota_lahan:
+            lahan_jenis_tanah = st.text_input("Jenis Tanah", disabled=True if kota_lahan else False, value=selected_kota["jenis_tanah"] if kota_lahan else None)
+        else:
+            lahan_jenis_tanah = st.selectbox("Jenis Tanah", ["latosol", "regosol", "gambut", "grumosol", "humus", "aluvial", "rendzina", "litosol", "mediteran"], index=None)
+        if kota_lahan:
+            lahan_tekstur_tanah = st.text_input("Tekstur Tanah", disabled=True if kota_lahan else False, value=selected_kota["tekstur_tanah"] if kota_lahan else None)
+        else:
+            lahan_tekstur_tanah = st.selectbox("Tekstur Tanah", ["liat berpasir", "liat", "liat berdebu", "lempung berliat", "lempung liat berpasir", "lempung liat berdebu", "lempung berpasir sangat halus", "lempung", "lempung berdebu", "debu"], index=None)
 
-        # add eigenvector attribute
-        selected_kota["ev_jenis_tanah"] = eigenvectors["eigenvector"]["ahp_jenis_tanah"][lahan_jenis_tanah]
-        selected_kota["ev_tekstur_tanah"] = eigenvectors["eigenvector"]["ahp_tekstur_tanah"][lahan_tekstur_tanah]
+        lahan_ph = st.text_input("pH", disabled=True if kota_lahan else False, value=selected_kota["ph"] if kota_lahan else None)
+        lahan_kemiringan = st.text_input("Kemiringan", disabled=True if kota_lahan else False, value=selected_kota["kemiringan"] if kota_lahan else None)
+        lahan_topografi = st.text_input("Topografi", disabled=True if kota_lahan else False, value=selected_kota["topografi"] if kota_lahan else None)
 
-if selected_kota:
+
+        # submitbtn
+        dss_btn = st.form_submit_button("Calculate Ranking")
+        if dss_btn:
+            if not kota_lahan:
+                # TODO: handle range values
+                if "-" in lahan_suhu and not lahan_suhu.startswith("-"):
+                    lahan_suhu = dssutils.replace_with_mid_value(lahan_suhu)
+                    
+                if "-" in lahan_curah_hujan and not lahan_curah_hujan.startswith("-"):
+                    lahan_curah_hujan = dssutils.replace_with_mid_value(lahan_curah_hujan)
+                    
+                if "-" in lahan_kelembapan and not lahan_kelembapan.startswith("-"):
+                    lahan_kelembapan = dssutils.replace_with_mid_value(lahan_kelembapan)
+
+                if "-" in lahan_ph and not lahan_ph.startswith("-"):
+                    lahan_ph = dssutils.replace_with_mid_value(lahan_ph)
+
+                if "-" in lahan_kemiringan and not lahan_kemiringan.startswith("-"):
+                    lahan_kemiringan = dssutils.replace_with_mid_value(lahan_kemiringan)
+
+                if "-" in lahan_topografi and not lahan_topografi.startswith("-"):
+                    lahan_topografi = dssutils.replace_with_mid_value(lahan_topografi)
+
+                selected_kota = {
+                    "desa": lahan_kota,
+                    "suhu": float(lahan_suhu),
+                    "curah_hujan": float(lahan_curah_hujan),
+                    "kelembapan": float(lahan_kelembapan),
+                    "jenis_tanah": lahan_jenis_tanah,
+                    "tekstur_tanah": lahan_tekstur_tanah,
+                    "ph": float(lahan_ph),
+                    "kemiringan": float(lahan_kemiringan),
+                    "topografi": float(lahan_topografi)
+                }
+
+            # add eigenvector attribute
+            selected_kota["ev_jenis_tanah"] = eigenvectors["eigenvector"]["ahp_jenis_tanah"][lahan_jenis_tanah]
+            selected_kota["ev_tekstur_tanah"] = eigenvectors["eigenvector"]["ahp_tekstur_tanah"][lahan_tekstur_tanah]
+
+            do_calculation = True
+            
+            # st.write(selected_kota)
+
+if do_calculation:
     st.subheader("Step 2 - Perhitungan AHP & Interpolasi")
     with st.expander("AHP & Interpolasi", expanded=True):
 
