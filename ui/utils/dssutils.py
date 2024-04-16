@@ -64,3 +64,7 @@ def replace_with_mid_value(value):
     # calculate mid value
     mid_val = (min_val + max_val) / 2
     return mid_val
+
+
+# "20 - 50" -> range -> nilai tengah
+# "-50" -> 1
