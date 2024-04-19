@@ -110,4 +110,5 @@ for kota in lahans:
     rank_kota.append(df_rank)
 
 df_all = pd.concat(rank_kota, axis=0, ignore_index=True)
+df_all = df_all.pivot(index="kota", columns="rank", values="jenis_tanaman").add_prefix("Rank ").reset_index().rename_axis(None, axis=1)
 st.dataframe(df_all, use_container_width=True, height=1000)
