@@ -60,5 +60,10 @@ def read_tanaman(db: Session, return_dict: bool = True):
     return None
 
 
+def get_tanaman_by_name(db: Session, name: str):
+    tanaman = ctanaman.read_tanaman_by_name(db, name)
+    return tanaman
+
+
 def delete_tanaman(db: Session, id: int):
     ctanaman.delete_tanaman(db, id)
