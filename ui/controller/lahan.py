@@ -11,25 +11,25 @@ logger = logging.getLogger(__name__)
 def insert_lahan(
     db: Session,
     desa: str,
-    suhu: str,
     curah_hujan: str,
-    kelembapan: str,
     jenis_tanah: str,
     tekstur_tanah: str,
-    ph: str,
-    kemiringan: str,
-    topografi: str,
+    suhu: float,
+    kelembapan: float,
+    ph: float,
+    kemiringan: float,
+    topografi: float,
 ):
     lahan = Lahan(
         desa=desa,
-        suhu=suhu,
-        curah_hujan=curah_hujan,
-        kelembapan=kelembapan,
+        suhu=float(suhu),
+        curah_hujan=float(curah_hujan),
+        kelembapan=float(kelembapan),
         jenis_tanah=jenis_tanah,
         tekstur_tanah=tekstur_tanah,
-        ph=ph,
-        kemiringan=kemiringan,
-        topografi=topografi,
+        ph=float(ph),
+        kemiringan=float(kemiringan),
+        topografi=float(topografi),
     )
 
     clahan.insert_lahan(db, lahan)
@@ -45,8 +45,12 @@ def read_lahan(db: Session, return_dict: bool = True):
         
         return lahans
         
-
     return None
+
+
+def get_lahan_by_name(db: Session, name: str):
+    lahan = clahan.read_lahan_by_name(db, name)
+    return lahan
 
 
 def delete_lahan(db: Session, id: int):
