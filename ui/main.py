@@ -10,7 +10,7 @@ import os
 load_dotenv()
 
 st.set_page_config(
-    page_title="Hortikultura Decision Support System",
+    page_title="Sistem Pendukung Keputusan Hortikultura",
     page_icon="🌱",
     initial_sidebar_state="collapsed",
 )

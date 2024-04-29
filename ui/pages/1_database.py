@@ -12,13 +12,13 @@ logging.info(st.session_state)
 
 
 st.set_page_config(
-    page_title="Hortikultura DSS Data Management",
+    page_title="Hortikultura DSS Manajemen Data",
     page_icon="🌱",
     initial_sidebar_state="collapsed",
 )
 
 
-st.write("# Data Management")
+st.write("# Manajemen Data")
 
 
 tab1, tab2 = st.tabs(["🌱 Profil Ideal Tanaman", "🪨 Profil Kondisi Lahan"])

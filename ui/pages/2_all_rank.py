@@ -14,12 +14,12 @@ dbutils.init_db()
 
 
 st.set_page_config(
-    page_title="Hortikultura Ranks in All Cities",
+    page_title="Hortikultura Ranking di Seluruh Kota",
     page_icon="🌱",
     initial_sidebar_state="collapsed",
 )
 
-st.write("# Rank in All Cities")
+st.write("# Ranking di Seluruh Kota")
 
 
 # load data
