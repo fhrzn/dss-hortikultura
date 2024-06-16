@@ -8,6 +8,7 @@ import os
 from sklearn.metrics import classification_report, accuracy_score, f1_score, recall_score, precision_score, confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt 
 import seaborn as sns
+import numpy as np
 
 
 logger = logging.getLogger(__name__)
@@ -154,15 +155,24 @@ if eval_city:
     st.write(f"Precision Score: {precision_score(y_true, y_pred, average='weighted') * 100:.2f}%")
     
 
-    cm = confusion_matrix(y_true, y_pred)
+    cm = confusion_matrix(y_true, y_pred)  # Confusion matrix without normalization
     
-    fig, ax = plt.subplots(1, 1, figsize=(8,6))
-    ax = sns.heatmap(cm, annot=True, fmt='d')
+    cm_sum = np.sum(cm, axis=1, keepdims=True)
+    cm_percent = cm / cm_sum.astype(float) * 100
+    
+    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+    sns.heatmap(cm_percent, annot=True, fmt='.2f', cmap='Blues', cbar=False, ax=ax)  # fmt='.2f' for 2 decimal places
     ax.xaxis.set_ticklabels(y_label)
     ax.yaxis.set_ticklabels(y_label)
     ax.set_xlabel("\nPredicted Label")
     ax.set_ylabel("True Label\n")
     ax.set_title("\nConfusion Matrix\n")
+    
+    for i in range(len(y_label)):
+        for j in range(len(y_label)):
+            text = ax.text(j + 0.5, i + 0.5, f"{cm[i, j]} ({cm_percent[i, j]:.2f}%)",
+                           ha='center', va='center', color='black' if cm_percent[i, j] < 50 else 'white', fontsize=10)  
+            # Adjust text color based on background intensity
 
     st.pyplot(fig)
 
