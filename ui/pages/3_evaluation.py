@@ -16,6 +16,30 @@ logger = logging.getLogger(__name__)
 dbutils.init_db()
 
 
+def calculate_metrics(data, l2i, i2l):
+    try:
+        y_true = [l2i[i] for i in data["actual"]][:3]
+        y_pred = [l2i[i] for i in data["predicted"] if l2i[i] in y_true]
+        y_label = [i2l[i] for i in y_true]
+
+        return {
+            'y_true': y_true,
+            'y_pred': y_pred,
+            'y_label': y_label,
+            'accuracy': accuracy_score(y_true, y_pred) * 100,
+            'recall': recall_score(y_true, y_pred, average='weighted') * 100,
+            'precision': precision_score(y_true, y_pred, average='weighted') * 100
+        }
+    except:
+        return {
+            'y_true': None,
+            'y_pred': None,
+            'y_label': None,
+            'accuracy': 0,
+            'recall': 0,
+            'precision': 0
+        }
+
 st.set_page_config(
     page_title="Hortikultura Evaluasi per Kota",
     page_icon="🌱",
@@ -133,48 +157,57 @@ for _, data in df_all.iterrows():
     # st.write(d[0])
 
 # evaluation
-l2i = {}
-i2l = {}
-cities = list(pair_grt_pred.keys())
+sample_labels = sorted(pair_grt_pred['Bangkoor']['predicted'])
+l2i = {v: k for k, v in enumerate(sample_labels)}
+i2l = {k: v for k, v in enumerate(sample_labels)}
+cities = ["Semua Kota"] + list(pair_grt_pred.keys())
 
 eval_city = st.selectbox("Pilih Kota", cities, index=None)
 
 if eval_city:
-    data = pair_grt_pred[eval_city]
-    if not l2i:
-        labels = sorted(data["predicted"])
-        l2i = {v: k for k, v in enumerate(labels)}
-        i2l = {k: v for k, v in enumerate(labels)}
+    if eval_city.lower() == "semua kota":
+        metrics = {'accuracy': 0, 'recall': 0, 'precision': 0}
+        for city in cities[1:]:
+            _metrics = calculate_metrics(pair_grt_pred[city], l2i, i2l)
+            metrics['accuracy'] += _metrics['accuracy']
+            metrics['recall'] += _metrics['recall']
+            metrics['precision'] += _metrics['precision']
+        
+        metrics['accuracy'] /= len(cities[1:])
+        metrics['recall'] /= len(cities[1:])
+        metrics['precision'] /= len(cities[1:])
+        
+    else:
+        data = pair_grt_pred[eval_city]
+        metrics = calculate_metrics(data, l2i, i2l)
 
-    y_true = [l2i[i] for i in data["actual"]][:3]
-    y_pred = [l2i[i] for i in data["predicted"] if l2i[i] in y_true]
-    y_label = [i2l[i] for i in y_true]
 
-    st.write(f"Accuracy Score: {accuracy_score(y_true, y_pred) * 100:.2f}%")
-    st.write(f"Recall Score: {recall_score(y_true, y_pred, average='weighted') * 100:.2f}%")
-    st.write(f"Precision Score: {precision_score(y_true, y_pred, average='weighted') * 100:.2f}%")
+    st.write(f"Accuracy Score: {metrics['accuracy']:.2f}%")
+    st.write(f"Recall Score: {metrics['recall']:.2f}%")
+    st.write(f"Precision Score: {metrics['precision']:.2f}%")
     
+    if eval_city.lower() != "semua kota":
+        if metrics['y_true'] or metrics['y_pred'] or metrics['y_label']:
+            cm = confusion_matrix(metrics['y_true'], metrics['y_pred'])  # Confusion matrix without normalization
+            
+            cm_sum = np.sum(cm, axis=1, keepdims=True)
+            cm_percent = cm / cm_sum.astype(float) * 100
+            
+            fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+            sns.heatmap(cm_percent, annot=True, fmt='.2f', cmap='Blues', cbar=False, ax=ax)  # fmt='.2f' for 2 decimal places
+            ax.xaxis.set_ticklabels(metrics['y_label'])
+            ax.yaxis.set_ticklabels(metrics['y_label'])
+            ax.set_xlabel("\nPredicted Label")
+            ax.set_ylabel("True Label\n")
+            ax.set_title("\nConfusion Matrix\n")
+            
+            for i in range(len(metrics['y_label'])):
+                for j in range(len(metrics['y_label'])):
+                    text = ax.text(j + 0.5, i + 0.5, f"{cm[i, j]} ({cm_percent[i, j]:.2f}%)",
+                                ha='center', va='center', color='black' if cm_percent[i, j] < 50 else 'white', fontsize=10)  
+                    # Adjust text color based on background intensity
 
-    cm = confusion_matrix(y_true, y_pred)  # Confusion matrix without normalization
-    
-    cm_sum = np.sum(cm, axis=1, keepdims=True)
-    cm_percent = cm / cm_sum.astype(float) * 100
-    
-    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-    sns.heatmap(cm_percent, annot=True, fmt='.2f', cmap='Blues', cbar=False, ax=ax)  # fmt='.2f' for 2 decimal places
-    ax.xaxis.set_ticklabels(y_label)
-    ax.yaxis.set_ticklabels(y_label)
-    ax.set_xlabel("\nPredicted Label")
-    ax.set_ylabel("True Label\n")
-    ax.set_title("\nConfusion Matrix\n")
-    
-    for i in range(len(y_label)):
-        for j in range(len(y_label)):
-            text = ax.text(j + 0.5, i + 0.5, f"{cm[i, j]} ({cm_percent[i, j]:.2f}%)",
-                           ha='center', va='center', color='black' if cm_percent[i, j] < 50 else 'white', fontsize=10)  
-            # Adjust text color based on background intensity
-
-    st.pyplot(fig)
+            st.pyplot(fig)
 
 
     
