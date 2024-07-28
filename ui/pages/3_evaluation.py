@@ -58,7 +58,7 @@ def make_matrix(data, ntop):
     df_matrix = pd.DataFrame(matrix, index=top_pred, columns=top_actual)
 
     fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-    sns.heatmap(df_matrix, annot=True, fmt='.2f', cmap='Blues', cbar=False, ax=ax)  # fmt='.2f' for 2 decimal places
+    sns.heatmap(df_matrix, annot=True, cmap='Blues', cbar=False, ax=ax)  # fmt='.2f' for 2 decimal places
     ax.yaxis.set_ticklabels(top_pred)
     ax.xaxis.set_ticklabels(top_actual)
     ax.set_xlabel("\nTrue Label\n")
@@ -289,10 +289,10 @@ if eval_city:
             ],
         }
 
-        st.write('### Overall Top-N Accuracy, Precision, Recall ')
+        st.write('### Rata-rata Top-N Accuracy, Precision, Recall')
         st.dataframe(pd.DataFrame(data=final_data, index=_metrics['index']), use_container_width=True)
 
-        st.write('#### Detailed per City Top-N Accuracy, Precision, Recall')
+        st.write('#### Detil Top-N Accuracy, Precision, Recall per Kota')
         st.dataframe(pd.DataFrame(data=dfs), use_container_width=True)
         
     else:
@@ -307,7 +307,7 @@ if eval_city:
         fig, ax = make_matrix(data, n_top)
         st.pyplot(fig)
 
-        st.write("### List of prediction vs actual labels")
+        st.write("### Hasil Prediksi vs Ground Truth")
         data['actual'] = data['actual'] + [None] * (len(data['predicted']) - len(data['actual']))
         st.dataframe(pd.DataFrame(data), use_container_width=True, height=600)
 
