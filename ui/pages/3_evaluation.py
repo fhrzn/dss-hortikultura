@@ -16,29 +16,59 @@ logger = logging.getLogger(__name__)
 dbutils.init_db()
 
 
-def calculate_metrics(data, l2i, i2l):
-    try:
-        y_true = [l2i[i] for i in data["actual"]][:3]
-        y_pred = [l2i[i] for i in data["predicted"] if l2i[i] in y_true]
-        y_label = [i2l[i] for i in y_true]
+def calculate_metrics(data, ntop: int = None):
+    def _calculate_top_metrics(data, ntop):
+        try:
+            if len(data['actual']) < ntop:
+                ntop = len(data['actual'])
+            top_pred = data['predicted'][:ntop]
+            top_actual = data['actual'][:ntop]
+            intersect = set(top_pred).intersection(set(top_actual))
+            return 1 if intersect else 0
+        except:
+            return 0
+    
+    top1 = _calculate_top_metrics(data, 1)
+    top3 = _calculate_top_metrics(data, 3)
+    top4 = _calculate_top_metrics(data, 4)
+    top5 = _calculate_top_metrics(data, 5)
 
-        return {
-            'y_true': y_true,
-            'y_pred': y_pred,
-            'y_label': y_label,
-            'accuracy': accuracy_score(y_true, y_pred) * 100,
-            'recall': recall_score(y_true, y_pred, average='weighted') * 100,
-            'precision': precision_score(y_true, y_pred, average='weighted') * 100
+    result = {
+        'index': ['Top-1', 'Top-3', 'Top-4', 'Top-5'],
+        'data': {
+            'Accuracy': [top1, top3, top4, top5],
+            'Recall': [top1, top3, top4, top5],
+            'Precision': [top1, top3, top4, top5],
         }
-    except:
-        return {
-            'y_true': None,
-            'y_pred': None,
-            'y_label': None,
-            'accuracy': 0,
-            'recall': 0,
-            'precision': 0
-        }
+    }
+
+    return result
+
+def make_matrix(data, ntop):
+    top_pred = data['predicted'][:ntop]
+    top_actual = data['actual'][:ntop]
+    matrix = np.zeros((ntop, ntop))
+
+    intersect = set(data['actual'][:ntop]).intersection(set(data['predicted'][:ntop]))
+    for i in intersect:
+        i_pred = top_pred.index(i)
+        j_pred = top_actual.index(i)
+        matrix[i_pred, j_pred] = 1
+
+    df_matrix = pd.DataFrame(matrix, index=top_pred, columns=top_actual)
+
+    fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+    sns.heatmap(df_matrix, annot=True, fmt='.2f', cmap='Blues', cbar=False, ax=ax)  # fmt='.2f' for 2 decimal places
+    ax.yaxis.set_ticklabels(top_pred)
+    ax.xaxis.set_ticklabels(top_actual)
+    ax.set_xlabel("\nTrue Label\n")
+    ax.set_ylabel("\nPredicted Label")
+    ax.set_title(f"\nTop-{ntop}\n")
+
+    return fig, ax
+
+    
+
 
 st.set_page_config(
     page_title="Hortikultura Evaluasi per Kota",
@@ -157,6 +187,7 @@ for _, data in df_all.iterrows():
     # st.write(d[0])
 
 # evaluation
+eval_result = []
 sample_labels = sorted(pair_grt_pred['Bangkoor']['predicted'])
 l2i = {v: k for k, v in enumerate(sample_labels)}
 i2l = {k: v for k, v in enumerate(sample_labels)}
@@ -166,48 +197,176 @@ eval_city = st.selectbox("Pilih Kota", cities, index=None)
 
 if eval_city:
     if eval_city.lower() == "semua kota":
-        metrics = {'accuracy': 0, 'recall': 0, 'precision': 0}
+        # metrics = {'accuracy': 0, 'recall': 0, 'precision': 0}
+        metrics = {
+            'accuracy': {
+                'top1': 0,
+                'top3': 0,
+                'top4': 0,
+                'top5': 0,
+            },
+            'recall': {
+                'top1': 0,
+                'top3': 0,
+                'top4': 0,
+                'top5': 0,
+            },
+            'precision': {
+                'top1': 0,
+                'top3': 0,
+                'top4': 0,
+                'top5': 0,
+            }
+        }
+        dfs = []
         for city in cities[1:]:
-            _metrics = calculate_metrics(pair_grt_pred[city], l2i, i2l)
-            metrics['accuracy'] += _metrics['accuracy']
-            metrics['recall'] += _metrics['recall']
-            metrics['precision'] += _metrics['precision']
-        
-        metrics['accuracy'] /= len(cities[1:])
-        metrics['recall'] /= len(cities[1:])
-        metrics['precision'] /= len(cities[1:])
+            _metrics = calculate_metrics(pair_grt_pred[city])
+            # dfs.append({"city": city, "df": pd.DataFrame(data=_metrics['data'], index=_metrics['index'])})
+            dfs.append({
+                "city": city,
+                "Acc_Top1": _metrics['data']['Accuracy'][0],
+                "Acc_Top3": _metrics['data']['Accuracy'][1],
+                "Acc_Top4": _metrics['data']['Accuracy'][2],
+                "Acc_Top5": _metrics['data']['Accuracy'][3],
+                "Prec_Top1": _metrics['data']['Precision'][0],
+                "Prec_Top3": _metrics['data']['Precision'][1],
+                "Prec_Top4": _metrics['data']['Precision'][2],
+                "Prec_Top5": _metrics['data']['Precision'][3],
+                "Rec_Top1": _metrics['data']['Recall'][0],
+                "Rec_Top3": _metrics['data']['Recall'][1],
+                "Rec_Top4": _metrics['data']['Recall'][2],
+                "Rec_Top5": _metrics['data']['Recall'][3],
+            })
+            
+            metrics['accuracy']['top1'] += _metrics['data']['Accuracy'][0]
+            metrics['accuracy']['top3'] += _metrics['data']['Accuracy'][1]
+            metrics['accuracy']['top4'] += _metrics['data']['Accuracy'][2]
+            metrics['accuracy']['top5'] += _metrics['data']['Accuracy'][3]
+
+            metrics['recall']['top1'] += _metrics['data']['Recall'][0]
+            metrics['recall']['top3'] += _metrics['data']['Recall'][1]
+            metrics['recall']['top4'] += _metrics['data']['Recall'][2]
+            metrics['recall']['top5'] += _metrics['data']['Recall'][3]
+
+            metrics['precision']['top1'] += _metrics['data']['Precision'][0]
+            metrics['precision']['top3'] += _metrics['data']['Precision'][1]
+            metrics['precision']['top4'] += _metrics['data']['Precision'][2]
+            metrics['precision']['top5'] += _metrics['data']['Precision'][3]
+
+        metrics['accuracy']['top1'] /= len(cities[1:])
+        metrics['accuracy']['top3'] /= len(cities[1:])
+        metrics['accuracy']['top4'] /= len(cities[1:])
+        metrics['accuracy']['top5'] /= len(cities[1:])
+
+        metrics['recall']['top1'] /= len(cities[1:])
+        metrics['recall']['top3'] /= len(cities[1:])
+        metrics['recall']['top4'] /= len(cities[1:])
+        metrics['recall']['top5'] /= len(cities[1:])
+
+        metrics['precision']['top1'] /= len(cities[1:])
+        metrics['precision']['top3'] /= len(cities[1:])
+        metrics['precision']['top4'] /= len(cities[1:])
+        metrics['precision']['top5'] /= len(cities[1:])
+
+        final_data = {
+            'Accuracy': [
+                metrics['accuracy']['top1'],
+                metrics['accuracy']['top3'],
+                metrics['accuracy']['top4'],
+                metrics['accuracy']['top5'],
+            ],
+            'Recall': [
+                metrics['recall']['top1'],
+                metrics['recall']['top3'],
+                metrics['recall']['top4'],
+                metrics['recall']['top5'],
+            ],
+            'Precision': [
+                metrics['precision']['top1'],
+                metrics['precision']['top3'],
+                metrics['precision']['top4'],
+                metrics['precision']['top5'],
+            ],
+        }
+
+        st.write('### Overall Top-N Accuracy, Precision, Recall ')
+        st.dataframe(pd.DataFrame(data=final_data, index=_metrics['index']), use_container_width=True)
+
+        st.write('#### Detailed per City Top-N Accuracy, Precision, Recall')
+        st.dataframe(pd.DataFrame(data=dfs), use_container_width=True)
         
     else:
         data = pair_grt_pred[eval_city]
-        metrics = calculate_metrics(data, l2i, i2l)
+        n_top = st.number_input("Top N (default: 3)", min_value=1, value=3, max_value=len(data['actual']))
+
+        st.write('### Top-N Accuracy, Precision, Recall')
+        metrics = calculate_metrics(data, n_top)
+        st.dataframe(pd.DataFrame(data=metrics['data'], index=metrics['index']), use_container_width=True)
+        
+        st.write('### Confusion Matrix')
+        fig, ax = make_matrix(data, n_top)
+        st.pyplot(fig)
+
+        st.write("### List of prediction vs actual labels")
+        data['actual'] = data['actual'] + [None] * (len(data['predicted']) - len(data['actual']))
+        st.dataframe(pd.DataFrame(data), use_container_width=True, height=600)
 
 
-    st.write(f"Accuracy Score: {metrics['accuracy']:.2f}%")
-    st.write(f"Recall Score: {metrics['recall']:.2f}%")
-    st.write(f"Precision Score: {metrics['precision']:.2f}%")
+
+
+
+# # evaluation
+# sample_labels = sorted(pair_grt_pred['Bangkoor']['predicted'])
+# l2i = {v: k for k, v in enumerate(sample_labels)}
+# i2l = {k: v for k, v in enumerate(sample_labels)}
+# cities = ["Semua Kota"] + list(pair_grt_pred.keys())
+
+# eval_city = st.selectbox("Pilih Kota", cities, index=None)
+
+# if eval_city:
+#     if eval_city.lower() == "semua kota":
+#         metrics = {'accuracy': 0, 'recall': 0, 'precision': 0}
+#         for city in cities[1:]:
+#             _metrics = calculate_metrics(pair_grt_pred[city], l2i, i2l)
+#             metrics['accuracy'] += _metrics['accuracy']
+#             metrics['recall'] += _metrics['recall']
+#             metrics['precision'] += _metrics['precision']
+        
+#         metrics['accuracy'] /= len(cities[1:])
+#         metrics['recall'] /= len(cities[1:])
+#         metrics['precision'] /= len(cities[1:])
+        
+#     else:
+#         data = pair_grt_pred[eval_city]
+#         metrics = calculate_metrics(data, l2i, i2l)
+
+
+#     st.write(f"Accuracy Score: {metrics['accuracy']:.2f}%")
+#     st.write(f"Recall Score: {metrics['recall']:.2f}%")
+#     st.write(f"Precision Score: {metrics['precision']:.2f}%")
     
-    if eval_city.lower() != "semua kota":
-        if metrics['y_true'] or metrics['y_pred'] or metrics['y_label']:
-            cm = confusion_matrix(metrics['y_true'], metrics['y_pred'])  # Confusion matrix without normalization
+#     if eval_city.lower() != "semua kota":
+#         if metrics['y_true'] or metrics['y_pred'] or metrics['y_label']:
+#             cm = confusion_matrix(metrics['y_true'], metrics['y_pred'])  # Confusion matrix without normalization
             
-            cm_sum = np.sum(cm, axis=1, keepdims=True)
-            cm_percent = cm / cm_sum.astype(float) * 100
+#             cm_sum = np.sum(cm, axis=1, keepdims=True)
+#             cm_percent = cm / cm_sum.astype(float) * 100
             
-            fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-            sns.heatmap(cm_percent, annot=True, fmt='.2f', cmap='Blues', cbar=False, ax=ax)  # fmt='.2f' for 2 decimal places
-            ax.xaxis.set_ticklabels(metrics['y_label'])
-            ax.yaxis.set_ticklabels(metrics['y_label'])
-            ax.set_xlabel("\nPredicted Label")
-            ax.set_ylabel("True Label\n")
-            ax.set_title("\nConfusion Matrix\n")
+#             fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+#             sns.heatmap(cm_percent, annot=True, fmt='.2f', cmap='Blues', cbar=False, ax=ax)  # fmt='.2f' for 2 decimal places
+#             ax.xaxis.set_ticklabels(metrics['y_label'])
+#             ax.yaxis.set_ticklabels(metrics['y_label'])
+#             ax.set_xlabel("\nPredicted Label")
+#             ax.set_ylabel("True Label\n")
+#             ax.set_title("\nConfusion Matrix\n")
             
-            for i in range(len(metrics['y_label'])):
-                for j in range(len(metrics['y_label'])):
-                    text = ax.text(j + 0.5, i + 0.5, f"{cm[i, j]} ({cm_percent[i, j]:.2f}%)",
-                                ha='center', va='center', color='black' if cm_percent[i, j] < 50 else 'white', fontsize=10)  
-                    # Adjust text color based on background intensity
+#             for i in range(len(metrics['y_label'])):
+#                 for j in range(len(metrics['y_label'])):
+#                     text = ax.text(j + 0.5, i + 0.5, f"{cm[i, j]} ({cm_percent[i, j]:.2f}%)",
+#                                 ha='center', va='center', color='black' if cm_percent[i, j] < 50 else 'white', fontsize=10)  
+#                     # Adjust text color based on background intensity
 
-            st.pyplot(fig)
+#             st.pyplot(fig)
 
 
     
