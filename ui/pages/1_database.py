@@ -115,7 +115,7 @@ with tab2:
     with st.expander("Input Data Lahan Baru", expanded=False):
         with st.form("lahan_form", border=False, clear_on_submit=True):
             # create input fields
-            lahan_kota = st.text_input("Kota", placeholder="ex: Kota Uneng")
+            lahan_kota = st.text_input("Lahan", placeholder="ex: Uneng")
             lahan_suhu = st.text_input("Suhu", placeholder="ex: 10")
             lahan_curah_hujan = st.text_input("Curah Hujan", placeholder="ex: 350")
             lahan_kelembapan = st.text_input("Kelembapan", placeholder="ex: 80")
@@ -131,7 +131,7 @@ with tab2:
                 is_duplicated = helper.check_lahan_duplicate(lahan_kota)
                 logger.info(is_duplicated)
                 if is_duplicated:
-                    st.error(f"Desa/Kota {lahan_kota} sudah ada di database.", icon="⚠️")
+                    st.error(f"Lahan {lahan_kota} sudah ada di database.", icon="⚠️")
                 else:
                     lahan.insert_lahan(
                         db=st.session_state["db"],

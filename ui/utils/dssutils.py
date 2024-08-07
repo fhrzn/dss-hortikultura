@@ -68,3 +68,29 @@ def replace_with_mid_value(value):
 
 # "20 - 50" -> range -> nilai tengah
 # "-50" -> 1
+
+def calculate_metrics(data, ntop: int = None):
+    def _calculate_top_metrics(data, ntop):
+        try:
+            top_pred = data['predicted'][:ntop]
+            top_actual = data['actual']
+            intersect = set(top_pred).intersection(set(top_actual))
+            return 1 if intersect else 0
+        except:
+            return 0
+    
+    top1 = _calculate_top_metrics(data, 1)
+    top3 = _calculate_top_metrics(data, 3)
+    top4 = _calculate_top_metrics(data, 4)
+    top5 = _calculate_top_metrics(data, 5)
+
+    result = {
+        'index': ['Top-1', 'Top-3', 'Top-4', 'Top-5'],
+        'data': {
+            'Accuracy': [top1, top3, top4, top5],
+            'Recall': [top1, top3, top4, top5],
+            'Precision': [top1, top3, top4, top5],
+        }
+    }
+
+    return result
