@@ -35,18 +35,18 @@ tanamans = tanaman.read_tanaman(db=st.session_state["db"], return_dict=False)
 selected_kota = None
 do_calculation = False
 
-st.subheader("Step 1 - Pilih Kota")
-with st.expander("Pilih Kota/Desa tempat Lahan", expanded=True):
-    kotas = [l['desa'] for l in lahans]
-    kota_lahan = st.selectbox("Daftar Kota/Desa", kotas, index=None)
+st.subheader("Step 1 - Pilih Lahan")
+with st.expander("Pilih Lahan", expanded=True):
+    kotas = [l['lahan'] for l in lahans]
+    kota_lahan = st.selectbox("Daftar Lahan", kotas, index=None)
 
     with st.form("dss_form", border=False, clear_on_submit=False):
         if kota_lahan:
-            selected_kota = [l for l in lahans if l['desa'] == kota_lahan][0]
+            selected_kota = [l for l in lahans if l['lahan'] == kota_lahan][0]
         # TODO: add catch when selected kota is empty
         # st.write(selected_kota)
 
-        lahan_kota = st.text_input("Kota", disabled=True if kota_lahan else False, value=selected_kota["desa"] if kota_lahan else None)
+        lahan_kota = st.text_input("Lahan", disabled=True if kota_lahan else False, value=selected_kota["lahan"] if kota_lahan else None)
         lahan_suhu = st.text_input("Suhu", disabled=True if kota_lahan else False, value=selected_kota["suhu"] if kota_lahan else None)
         lahan_curah_hujan = st.text_input("Curah Hujan", disabled=True if kota_lahan else False, value=selected_kota["curah_hujan"] if kota_lahan else None)
         lahan_kelembapan = st.text_input("Kelembapan", disabled=True if kota_lahan else False, value=selected_kota["kelembapan"] if kota_lahan else None)

@@ -29,7 +29,7 @@ class Lahan(Base):
     __tablename__ = "lahan"
 
     id = Column(Integer, index=True, primary_key=True, autoincrement=True)
-    desa = Column(String)
+    lahan = Column(String)
     suhu = Column(Double)
     curah_hujan = Column(Double)
     kelembapan = Column(Double)

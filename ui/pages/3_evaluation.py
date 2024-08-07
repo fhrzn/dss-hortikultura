@@ -7,6 +7,7 @@ import pandas as pd
 import os
 from sklearn.metrics import classification_report, accuracy_score, f1_score, recall_score, precision_score, confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt 
+from matplotlib.ticker import PercentFormatter
 import seaborn as sns
 import numpy as np
 
@@ -19,10 +20,8 @@ dbutils.init_db()
 def calculate_metrics(data, ntop: int = None):
     def _calculate_top_metrics(data, ntop):
         try:
-            if len(data['actual']) < ntop:
-                ntop = len(data['actual'])
             top_pred = data['predicted'][:ntop]
-            top_actual = data['actual'][:ntop]
+            top_actual = data['actual']
             intersect = set(top_pred).intersection(set(top_actual))
             return 1 if intersect else 0
         except:
@@ -71,12 +70,12 @@ def make_matrix(data, ntop):
 
 
 st.set_page_config(
-    page_title="Hortikultura Evaluasi per Kota",
+    page_title="Hortikultura Evaluasi per Lahan",
     page_icon="🌱",
     initial_sidebar_state="collapsed",
 )
 
-st.write("# Evaluasi di tiap Kota")
+st.write("# Evaluasi di tiap Lahan")
 
 
 # load data
@@ -96,7 +95,7 @@ for kota in lahans:
     tanaman_kota = tanamans.copy()
     for t in tanaman_kota:
         # add kota name
-        t["kota"] = kota["desa"]
+        t["lahan"] = kota["lahan"]
 
         # add eigenvector attribute
         t["ev_jenis_tanah"] = eigenvectors["eigenvector"]["ahp_jenis_tanah"][t["jenis_tanah"].lower()]
@@ -160,16 +159,16 @@ for kota in lahans:
 
     # ranking    
     df_rank = pd.DataFrame.from_dict(tanaman_kota)
-    cols = ["kota", "jenis_tanaman", "pm_score"]
+    cols = ["lahan", "jenis_tanaman", "pm_score"]
     df_rank = df_rank[cols].sort_values("pm_score", ascending=False, ignore_index=True)
     df_rank['rank'] = [i for i in range(1, len(df_rank)+1)]
     # df_rank = df_rank[df_rank['rank'] <= 3]
-    df_rank = df_rank[['kota', 'jenis_tanaman', 'rank']]
+    df_rank = df_rank[['lahan', 'jenis_tanaman', 'rank']]
 
     rank_kota.append(df_rank)
 
 df_all = pd.concat(rank_kota, axis=0, ignore_index=True)
-df_all = df_all.pivot(index="kota", columns="rank", values="jenis_tanaman").add_prefix("Rank ").reset_index().rename_axis(None, axis=1)
+df_all = df_all.pivot(index="lahan", columns="rank", values="jenis_tanaman").add_prefix("Rank ").reset_index().rename_axis(None, axis=1)
 # df_all['predicted'] = df_all['Rank 1']
 # df_all = pd.pivot_table(df_all, index="kota", columns="jenis_tanaman")
 # st.dataframe(df_all, use_container_width=True, height=1000)
@@ -223,7 +222,7 @@ if eval_city:
             _metrics = calculate_metrics(pair_grt_pred[city])
             # dfs.append({"city": city, "df": pd.DataFrame(data=_metrics['data'], index=_metrics['index'])})
             dfs.append({
-                "city": city,
+                "lahan": city,
                 "Acc_Top1": _metrics['data']['Accuracy'][0],
                 "Acc_Top3": _metrics['data']['Accuracy'][1],
                 "Acc_Top4": _metrics['data']['Accuracy'][2],
@@ -290,9 +289,18 @@ if eval_city:
         }
 
         st.write('### Rata-rata Top-N Accuracy, Precision, Recall')
-        st.dataframe(pd.DataFrame(data=final_data, index=_metrics['index']), use_container_width=True)
+        eval_df = pd.DataFrame(data=final_data, index=_metrics['index'])
+        
+        st.dataframe(eval_df[['Accuracy', 'Recall', 'Precision']].applymap(lambda x: f'{x*100:.1f}%'), use_container_width=True)
 
-        st.write('#### Detil Top-N Accuracy, Precision, Recall per Kota')
+        fig = plt.figure(figsize=(10, 6))
+        eval_melted = eval_df.reset_index().melt(id_vars="index", var_name="metric", value_name="percentage")
+        sns.barplot(data=eval_melted, x="index", y="percentage", hue="metric")
+        plt.gca().yaxis.set_major_formatter(PercentFormatter(1.0))
+        plt.title("\nHasil Rekomendasi Sistem dan Data Dinas Pertanian Kab. Sikka\n")
+        st.pyplot(fig)
+
+        st.write('#### Detil Top-N Accuracy, Precision, Recall tiap Lahan')
         st.dataframe(pd.DataFrame(data=dfs), use_container_width=True)
         
     else:
@@ -311,63 +319,4 @@ if eval_city:
         data['actual'] = data['actual'] + [None] * (len(data['predicted']) - len(data['actual']))
         st.dataframe(pd.DataFrame(data), use_container_width=True, height=600)
 
-
-
-
-
-# # evaluation
-# sample_labels = sorted(pair_grt_pred['Bangkoor']['predicted'])
-# l2i = {v: k for k, v in enumerate(sample_labels)}
-# i2l = {k: v for k, v in enumerate(sample_labels)}
-# cities = ["Semua Kota"] + list(pair_grt_pred.keys())
-
-# eval_city = st.selectbox("Pilih Kota", cities, index=None)
-
-# if eval_city:
-#     if eval_city.lower() == "semua kota":
-#         metrics = {'accuracy': 0, 'recall': 0, 'precision': 0}
-#         for city in cities[1:]:
-#             _metrics = calculate_metrics(pair_grt_pred[city], l2i, i2l)
-#             metrics['accuracy'] += _metrics['accuracy']
-#             metrics['recall'] += _metrics['recall']
-#             metrics['precision'] += _metrics['precision']
-        
-#         metrics['accuracy'] /= len(cities[1:])
-#         metrics['recall'] /= len(cities[1:])
-#         metrics['precision'] /= len(cities[1:])
-        
-#     else:
-#         data = pair_grt_pred[eval_city]
-#         metrics = calculate_metrics(data, l2i, i2l)
-
-
-#     st.write(f"Accuracy Score: {metrics['accuracy']:.2f}%")
-#     st.write(f"Recall Score: {metrics['recall']:.2f}%")
-#     st.write(f"Precision Score: {metrics['precision']:.2f}%")
-    
-#     if eval_city.lower() != "semua kota":
-#         if metrics['y_true'] or metrics['y_pred'] or metrics['y_label']:
-#             cm = confusion_matrix(metrics['y_true'], metrics['y_pred'])  # Confusion matrix without normalization
-            
-#             cm_sum = np.sum(cm, axis=1, keepdims=True)
-#             cm_percent = cm / cm_sum.astype(float) * 100
-            
-#             fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-#             sns.heatmap(cm_percent, annot=True, fmt='.2f', cmap='Blues', cbar=False, ax=ax)  # fmt='.2f' for 2 decimal places
-#             ax.xaxis.set_ticklabels(metrics['y_label'])
-#             ax.yaxis.set_ticklabels(metrics['y_label'])
-#             ax.set_xlabel("\nPredicted Label")
-#             ax.set_ylabel("True Label\n")
-#             ax.set_title("\nConfusion Matrix\n")
-            
-#             for i in range(len(metrics['y_label'])):
-#                 for j in range(len(metrics['y_label'])):
-#                     text = ax.text(j + 0.5, i + 0.5, f"{cm[i, j]} ({cm_percent[i, j]:.2f}%)",
-#                                 ha='center', va='center', color='black' if cm_percent[i, j] < 50 else 'white', fontsize=10)  
-#                     # Adjust text color based on background intensity
-
-#             st.pyplot(fig)
-
-
-    
 
