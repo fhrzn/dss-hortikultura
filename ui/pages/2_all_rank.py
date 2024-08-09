@@ -1,7 +1,6 @@
 import streamlit as st
 import logging
 from utils import dbutils, dssutils
-from dotenv import load_dotenv
 from controller import lahan, tanaman
 import json
 import pandas as pd
@@ -114,6 +113,9 @@ for kota in lahans:
     rank_kota.append(df_rank)
 
 df_all = pd.concat(rank_kota, axis=0, ignore_index=True)
+# df_all = df_all.pivot(index="lahan", columns="rank", values="jenis_tanaman").add_prefix("Rank ").reset_index().rename_axis(None, axis=1)
+# st.dataframe(df_all, use_container_width=True, height=1000)
+
 df_all = df_all.pivot(index="lahan", columns="rank", values="jenis_tanaman").add_prefix("Rank ").reset_index().rename_axis(None, axis=1)
 st.dataframe(df_all, use_container_width=True, height=600)
 
@@ -155,7 +157,7 @@ metrics = {
     }
 }
 dfs = []
-for city in cities[1:]:
+for city in cities:
     _metrics = calculate_metrics(pair_grt_pred[city])
     # dfs.append({"city": city, "df": pd.DataFrame(data=_metrics['data'], index=_metrics['index'])})
     dfs.append({
@@ -173,7 +175,7 @@ for city in cities[1:]:
         "Rec_Top4": _metrics['data']['Recall'][2],
         "Rec_Top5": _metrics['data']['Recall'][3],
     })
-    
+
     metrics['accuracy']['top1'] += _metrics['data']['Accuracy'][0]
     metrics['accuracy']['top3'] += _metrics['data']['Accuracy'][1]
     metrics['accuracy']['top4'] += _metrics['data']['Accuracy'][2]
@@ -189,20 +191,20 @@ for city in cities[1:]:
     metrics['precision']['top4'] += _metrics['data']['Precision'][2]
     metrics['precision']['top5'] += _metrics['data']['Precision'][3]
 
-metrics['accuracy']['top1'] /= len(cities[1:])
-metrics['accuracy']['top3'] /= len(cities[1:])
-metrics['accuracy']['top4'] /= len(cities[1:])
-metrics['accuracy']['top5'] /= len(cities[1:])
+metrics['accuracy']['top1'] /= len(cities)
+metrics['accuracy']['top3'] /= len(cities)
+metrics['accuracy']['top4'] /= len(cities)
+metrics['accuracy']['top5'] /= len(cities)
 
-metrics['recall']['top1'] /= len(cities[1:])
-metrics['recall']['top3'] /= len(cities[1:])
-metrics['recall']['top4'] /= len(cities[1:])
-metrics['recall']['top5'] /= len(cities[1:])
+metrics['recall']['top1'] /= len(cities)
+metrics['recall']['top3'] /= len(cities)
+metrics['recall']['top4'] /= len(cities)
+metrics['recall']['top5'] /= len(cities)
 
-metrics['precision']['top1'] /= len(cities[1:])
-metrics['precision']['top3'] /= len(cities[1:])
-metrics['precision']['top4'] /= len(cities[1:])
-metrics['precision']['top5'] /= len(cities[1:])
+metrics['precision']['top1'] /= len(cities)
+metrics['precision']['top3'] /= len(cities)
+metrics['precision']['top4'] /= len(cities)
+metrics['precision']['top5'] /= len(cities)
 
 final_data = {
     'Accuracy': [
@@ -230,7 +232,19 @@ eval_df = pd.DataFrame(data=final_data, index=_metrics['index'])
 
 fig = plt.figure(figsize=(10, 6))
 eval_melted = eval_df.reset_index().melt(id_vars="index", var_name="metric", value_name="percentage")
-sns.barplot(data=eval_melted, x="index", y="percentage", hue="metric")
+ax = sns.barplot(data=eval_melted, x="index", y="percentage", hue="metric")
 plt.gca().yaxis.set_major_formatter(PercentFormatter(1.0))
 plt.title("\nHasil Rekomendasi Sistem dan Data Dinas Pertanian Kab. Sikka\n")
+
+top_n_ticks = eval_melted["index"].unique()
+for tick in top_n_ticks:
+    subset = eval_melted[eval_melted["index"] == tick]
+    max_percentage = subset["percentage"].max()
+    ax.text(
+        x=subset["index"].iloc[0], 
+        y=max_percentage + 0.0035,  # Adjust y position for clarity
+        s='{:.1f}%'.format(max_percentage * 100),
+        ha="center"
+    )
+
 st.pyplot(fig)
