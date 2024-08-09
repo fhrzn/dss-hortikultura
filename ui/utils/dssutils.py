@@ -72,8 +72,10 @@ def replace_with_mid_value(value):
 def calculate_metrics(data, ntop: int = None):
     def _calculate_top_metrics(data, ntop):
         try:
+            if len(data['actual']) < ntop:
+                ntop = len(data['actual'])
             top_pred = data['predicted'][:ntop]
-            top_actual = data['actual']
+            top_actual = data['actual'][:ntop]
             intersect = set(top_pred).intersection(set(top_actual))
             return 1 if intersect else 0
         except:

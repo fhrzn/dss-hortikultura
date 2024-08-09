@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 import seaborn as sns
 import numpy as np
+from matplotlib.ticker import PercentFormatter
 
 
 logger = logging.getLogger(__name__)
@@ -295,12 +296,24 @@ if eval_city:
 
         fig = plt.figure(figsize=(10, 6))
         eval_melted = eval_df.reset_index().melt(id_vars="index", var_name="metric", value_name="percentage")
-        sns.barplot(data=eval_melted, x="index", y="percentage", hue="metric")
+        ax = sns.barplot(data=eval_melted, x="index", y="percentage", hue="metric")
         plt.gca().yaxis.set_major_formatter(PercentFormatter(1.0))
         plt.title("\nHasil Rekomendasi Sistem dan Data Dinas Pertanian Kab. Sikka\n")
+
+        top_n_ticks = eval_melted["index"].unique()
+        for tick in top_n_ticks:
+            subset = eval_melted[eval_melted["index"] == tick]
+            max_percentage = subset["percentage"].max()
+            ax.text(
+                x=subset["index"].iloc[0], 
+                y=max_percentage + 0.0035,  # Adjust y position for clarity
+                s='{:.1f}%'.format(max_percentage * 100),
+                ha="center"
+            )
+            
         st.pyplot(fig)
 
-        st.write('#### Detil Top-N Accuracy, Precision, Recall tiap Lahan')
+        st.write('#### Detil Top-N Accuracy, Precision, Recall per Lahan')
         st.dataframe(pd.DataFrame(data=dfs), use_container_width=True)
         
     else:
