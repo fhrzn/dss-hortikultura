@@ -260,9 +260,9 @@ if eval_city:
         st.dataframe(tptn_df, use_container_width=True)
 
         fig = plt.figure(figsize=(10, 6))
-        eval_melted = tptn_df.reset_index().melt(id_vars="Top-N", var_name="metric", value_name="percentage")
-        ax = sns.barplot(data=eval_melted, x="Top-N", y="percentage", hue="metric")
-        plt.gca().yaxis.set_major_formatter(PercentFormatter(1.0))
+        eval_melted = tptn_df.reset_index().melt(id_vars="Top-N", var_name="metric", value_name="persentase")
+        ax = sns.barplot(data=eval_melted, x="Top-N", y="persentase", hue="metric")
+        plt.gca().yaxis.set_major_formatter(PercentFormatter(100))
         plt.title("\nGrafik Confusion Matrix\n")
 
         for p in ax.patches:

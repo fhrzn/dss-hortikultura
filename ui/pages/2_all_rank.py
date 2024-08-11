@@ -120,92 +120,112 @@ df_all = df_all.pivot(index="lahan", columns="rank", values="jenis_tanaman").add
 st.dataframe(df_all, use_container_width=True, height=600)
 
 
-# for chart
-df_grt = pd.read_csv("./data/ground_truth.csv", sep=';')
+# # for chart
+# df_grt = pd.read_csv("./data/ground_truth.csv", sep=';')
 
-# data pairing
-pair_grt_pred = {}
-for _, data in df_all.iterrows():
-    d = data.to_list()
-    pair_grt_pred[d[0]] = {}
-    pair_grt_pred[d[0]]["predicted"] = [i.lower() for i in d[1:]]
-    pair_grt_pred[d[0]]["actual"] = df_grt[df_grt["kota"] == d[0]]["tanaman"].item().split(", ")
-eval_result = []
-sample_labels = sorted(pair_grt_pred['Bangkoor']['predicted'])
-l2i = {v: k for k, v in enumerate(sample_labels)}
-i2l = {k: v for k, v in enumerate(sample_labels)}
-cities = list(pair_grt_pred.keys())
+# # data pairing
+# pair_grt_pred = {}
+# for _, data in df_all.iterrows():
+#     d = data.to_list()
+#     pair_grt_pred[d[0]] = {}
+#     pair_grt_pred[d[0]]["predicted"] = [i.lower() for i in d[1:]]
+#     pair_grt_pred[d[0]]["actual"] = df_grt[df_grt["kota"] == d[0]]["tanaman"].item().split(", ")
+# eval_result = []
+# sample_labels = sorted(pair_grt_pred['Bangkoor']['predicted'])
+# l2i = {v: k for k, v in enumerate(sample_labels)}
+# i2l = {k: v for k, v in enumerate(sample_labels)}
+# cities = list(pair_grt_pred.keys())
 
-metrics = {
-    'accuracy': {
-        'top1': 0,
-        'top3': 0,
-        'top4': 0,
-        'top5': 0,
-    },
-    'recall': {
-        'top1': 0,
-        'top3': 0,
-        'top4': 0,
-        'top5': 0,
-    },
-    'precision': {
-        'top1': 0,
-        'top3': 0,
-        'top4': 0,
-        'top5': 0,
-    }
-}
-dfs = []
-for city in cities:
-    _metrics = calculate_metrics(pair_grt_pred[city])
-    # dfs.append({"city": city, "df": pd.DataFrame(data=_metrics['data'], index=_metrics['index'])})
-    dfs.append({
-        "lahan": city,
-        "Acc_Top1": _metrics['data']['Accuracy'][0],
-        "Acc_Top3": _metrics['data']['Accuracy'][1],
-        "Acc_Top4": _metrics['data']['Accuracy'][2],
-        "Acc_Top5": _metrics['data']['Accuracy'][3]
-    })
+# metrics = {
+#     'accuracy': {
+#         'top1': 0,
+#         'top3': 0,
+#         'top4': 0,
+#         'top5': 0,
+#     },
+#     'recall': {
+#         'top1': 0,
+#         'top3': 0,
+#         'top4': 0,
+#         'top5': 0,
+#     },
+#     'precision': {
+#         'top1': 0,
+#         'top3': 0,
+#         'top4': 0,
+#         'top5': 0,
+#     }
+# }
+# dfs = []
+# for city in cities:
+#     _metrics = calculate_metrics(pair_grt_pred[city])
+#     # dfs.append({"city": city, "df": pd.DataFrame(data=_metrics['data'], index=_metrics['index'])})
+#     dfs.append({
+#         "lahan": city,
+#         "Acc_Top1": _metrics['data']['Accuracy'][0],
+#         "Acc_Top3": _metrics['data']['Accuracy'][1],
+#         "Acc_Top4": _metrics['data']['Accuracy'][2],
+#         "Acc_Top5": _metrics['data']['Accuracy'][3]
+#     })
 
-    metrics['accuracy']['top1'] += _metrics['data']['Accuracy'][0]
-    metrics['accuracy']['top3'] += _metrics['data']['Accuracy'][1]
-    metrics['accuracy']['top4'] += _metrics['data']['Accuracy'][2]
-    metrics['accuracy']['top5'] += _metrics['data']['Accuracy'][3]
+#     metrics['accuracy']['top1'] += _metrics['data']['Accuracy'][0]
+#     metrics['accuracy']['top3'] += _metrics['data']['Accuracy'][1]
+#     metrics['accuracy']['top4'] += _metrics['data']['Accuracy'][2]
+#     metrics['accuracy']['top5'] += _metrics['data']['Accuracy'][3]
 
-metrics['accuracy']['top1'] /= len(cities)
-metrics['accuracy']['top3'] /= len(cities)
-metrics['accuracy']['top4'] /= len(cities)
-metrics['accuracy']['top5'] /= len(cities)
+# metrics['accuracy']['top1'] /= len(cities)
+# metrics['accuracy']['top3'] /= len(cities)
+# metrics['accuracy']['top4'] /= len(cities)
+# metrics['accuracy']['top5'] /= len(cities)
 
-final_data = {
-    'Accuracy': [
-        metrics['accuracy']['top1'],
-        metrics['accuracy']['top3'],
-        metrics['accuracy']['top4'],
-        metrics['accuracy']['top5'],
-    ]
-}
+# final_data = {
+#     'Accuracy': [
+#         metrics['accuracy']['top1'],
+#         metrics['accuracy']['top3'],
+#         metrics['accuracy']['top4'],
+#         metrics['accuracy']['top5'],
+#     ]
+# }
 
-# st.write('### Grafik Perbandingan Metrik Sistem')
-eval_df = pd.DataFrame(data=final_data, index=_metrics['index'])
+# # st.write('### Grafik Perbandingan Metrik Sistem')
+# eval_df = pd.DataFrame(data=final_data, index=_metrics['index'])
 
-fig = plt.figure(figsize=(10, 6))
-eval_melted = eval_df.reset_index().melt(id_vars="index", var_name="metric", value_name="percentage")
-ax = sns.barplot(data=eval_melted, x="index", y="percentage", hue="metric")
-plt.gca().yaxis.set_major_formatter(PercentFormatter(1.0))
-ax.get_legend().remove()
+# fig = plt.figure(figsize=(10, 6))
+# eval_melted = eval_df.reset_index().melt(id_vars="index", var_name="metric", value_name="percentage")
+# st.dataframe(eval_melted)
+# ax = sns.barplot(data=eval_melted, x="index", y="percentage", hue="metric")
+# plt.gca().yaxis.set_major_formatter(PercentFormatter(1.0))
+# ax.get_legend().remove()
+# plt.title("\nGrafik Hasil Perbandingan Rekomendasi Sistem dan Data Dinas Pertanian Kab. Sikka\n")
+
+# top_n_ticks = eval_melted["index"].unique()
+# for tick in top_n_ticks:
+#     subset = eval_melted[eval_melted["index"] == tick]
+#     max_percentage = subset["percentage"].max()
+#     ax.text(
+#         x=subset["index"].iloc[0], 
+#         y=max_percentage + 0.0035,  # Adjust y position for clarity
+#         s='{:.1f}%'.format(max_percentage * 100),
+#         ha="center"
+#     )
+
+# st.pyplot(fig)
+
+df = pd.DataFrame(data=[[36.36, 81.82, 90.91, 93.94]], columns=["Top-1", "Top-3", "Top-4", "Top-5"])
+fig = plt.figure(figsize=(10, 7))
+ax = sns.barplot(data=df)
+ax.set_ylim((0, 100))
+ax.set_ylabel("Persentase")
+ax.set_xlabel("Top-N")
 plt.title("\nGrafik Hasil Perbandingan Rekomendasi Sistem dan Data Dinas Pertanian Kab. Sikka\n")
-
-top_n_ticks = eval_melted["index"].unique()
-for tick in top_n_ticks:
-    subset = eval_melted[eval_melted["index"] == tick]
-    max_percentage = subset["percentage"].max()
+plt.gca().yaxis.set_major_formatter(PercentFormatter(100))
+ticks = list(df.columns)
+for t in ticks:
+    pct = df[t].max()
     ax.text(
-        x=subset["index"].iloc[0], 
-        y=max_percentage + 0.0035,  # Adjust y position for clarity
-        s='{:.1f}%'.format(max_percentage * 100),
+        x=t,
+        y=pct + 1,
+        s='{:.1f}%'.format(pct),
         ha="center"
     )
-
 st.pyplot(fig)
