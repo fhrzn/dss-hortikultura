@@ -165,15 +165,7 @@ for city in cities:
         "Acc_Top1": _metrics['data']['Accuracy'][0],
         "Acc_Top3": _metrics['data']['Accuracy'][1],
         "Acc_Top4": _metrics['data']['Accuracy'][2],
-        "Acc_Top5": _metrics['data']['Accuracy'][3],
-        "Prec_Top1": _metrics['data']['Precision'][0],
-        "Prec_Top3": _metrics['data']['Precision'][1],
-        "Prec_Top4": _metrics['data']['Precision'][2],
-        "Prec_Top5": _metrics['data']['Precision'][3],
-        "Rec_Top1": _metrics['data']['Recall'][0],
-        "Rec_Top3": _metrics['data']['Recall'][1],
-        "Rec_Top4": _metrics['data']['Recall'][2],
-        "Rec_Top5": _metrics['data']['Recall'][3],
+        "Acc_Top5": _metrics['data']['Accuracy'][3]
     })
 
     metrics['accuracy']['top1'] += _metrics['data']['Accuracy'][0]
@@ -181,30 +173,10 @@ for city in cities:
     metrics['accuracy']['top4'] += _metrics['data']['Accuracy'][2]
     metrics['accuracy']['top5'] += _metrics['data']['Accuracy'][3]
 
-    metrics['recall']['top1'] += _metrics['data']['Recall'][0]
-    metrics['recall']['top3'] += _metrics['data']['Recall'][1]
-    metrics['recall']['top4'] += _metrics['data']['Recall'][2]
-    metrics['recall']['top5'] += _metrics['data']['Recall'][3]
-
-    metrics['precision']['top1'] += _metrics['data']['Precision'][0]
-    metrics['precision']['top3'] += _metrics['data']['Precision'][1]
-    metrics['precision']['top4'] += _metrics['data']['Precision'][2]
-    metrics['precision']['top5'] += _metrics['data']['Precision'][3]
-
 metrics['accuracy']['top1'] /= len(cities)
 metrics['accuracy']['top3'] /= len(cities)
 metrics['accuracy']['top4'] /= len(cities)
 metrics['accuracy']['top5'] /= len(cities)
-
-metrics['recall']['top1'] /= len(cities)
-metrics['recall']['top3'] /= len(cities)
-metrics['recall']['top4'] /= len(cities)
-metrics['recall']['top5'] /= len(cities)
-
-metrics['precision']['top1'] /= len(cities)
-metrics['precision']['top3'] /= len(cities)
-metrics['precision']['top4'] /= len(cities)
-metrics['precision']['top5'] /= len(cities)
 
 final_data = {
     'Accuracy': [
@@ -212,19 +184,7 @@ final_data = {
         metrics['accuracy']['top3'],
         metrics['accuracy']['top4'],
         metrics['accuracy']['top5'],
-    ],
-    'Recall': [
-        metrics['recall']['top1'],
-        metrics['recall']['top3'],
-        metrics['recall']['top4'],
-        metrics['recall']['top5'],
-    ],
-    'Precision': [
-        metrics['precision']['top1'],
-        metrics['precision']['top3'],
-        metrics['precision']['top4'],
-        metrics['precision']['top5'],
-    ],
+    ]
 }
 
 # st.write('### Grafik Perbandingan Metrik Sistem')
@@ -234,6 +194,7 @@ fig = plt.figure(figsize=(10, 6))
 eval_melted = eval_df.reset_index().melt(id_vars="index", var_name="metric", value_name="percentage")
 ax = sns.barplot(data=eval_melted, x="index", y="percentage", hue="metric")
 plt.gca().yaxis.set_major_formatter(PercentFormatter(1.0))
+ax.get_legend().remove()
 plt.title("\nGrafik Hasil Perbandingan Rekomendasi Sistem dan Data Dinas Pertanian Kab. Sikka\n")
 
 top_n_ticks = eval_melted["index"].unique()
