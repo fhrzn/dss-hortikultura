@@ -11,6 +11,7 @@ from matplotlib.ticker import PercentFormatter
 import seaborn as sns
 import numpy as np
 from matplotlib.ticker import PercentFormatter
+from collections import Counter
 
 
 logger = logging.getLogger(__name__)
@@ -199,27 +200,6 @@ eval_city = st.selectbox("Pilih Kota", cities, index=None)
 
 if eval_city:
     if eval_city.lower() == "semua kota":
-        # metrics = {'accuracy': 0, 'recall': 0, 'precision': 0}
-        metrics = {
-            'accuracy': {
-                'top1': 0,
-                'top3': 0,
-                'top4': 0,
-                'top5': 0,
-            },
-            'recall': {
-                'top1': 0,
-                'top3': 0,
-                'top4': 0,
-                'top5': 0,
-            },
-            'precision': {
-                'top1': 0,
-                'top3': 0,
-                'top4': 0,
-                'top5': 0,
-            }
-        }
         dfs = []
         for city in cities[1:]:
             _metrics = calculate_metrics(pair_grt_pred[city])
@@ -239,84 +219,198 @@ if eval_city:
                 "Rec_Top4": _metrics['data']['Recall'][2],
                 "Rec_Top5": _metrics['data']['Recall'][3],
             })
-            
-            metrics['accuracy']['top1'] += _metrics['data']['Accuracy'][0]
-            metrics['accuracy']['top3'] += _metrics['data']['Accuracy'][1]
-            metrics['accuracy']['top4'] += _metrics['data']['Accuracy'][2]
-            metrics['accuracy']['top5'] += _metrics['data']['Accuracy'][3]
 
-            metrics['recall']['top1'] += _metrics['data']['Recall'][0]
-            metrics['recall']['top3'] += _metrics['data']['Recall'][1]
-            metrics['recall']['top4'] += _metrics['data']['Recall'][2]
-            metrics['recall']['top5'] += _metrics['data']['Recall'][3]
+        result_lahan = pd.DataFrame(data=dfs)
 
-            metrics['precision']['top1'] += _metrics['data']['Precision'][0]
-            metrics['precision']['top3'] += _metrics['data']['Precision'][1]
-            metrics['precision']['top4'] += _metrics['data']['Precision'][2]
-            metrics['precision']['top5'] += _metrics['data']['Precision'][3]
+        tptn_table = result_lahan.iloc[:, :5]
+        top_1 = Counter(tptn_table['Acc_Top1'])
+        top_3 = Counter(tptn_table['Acc_Top3'])
+        top_4 = Counter(tptn_table['Acc_Top4'])
+        top_5 = Counter(tptn_table['Acc_Top5'])
 
-        metrics['accuracy']['top1'] /= len(cities[1:])
-        metrics['accuracy']['top3'] /= len(cities[1:])
-        metrics['accuracy']['top4'] /= len(cities[1:])
-        metrics['accuracy']['top5'] /= len(cities[1:])
+        tp_1, tn_1, fp_1, fn_1 = top_1[1], 0, 0, top_1[0]
+        tp_3, tn_3, fp_3, fn_3 = top_3[1], 0, 0, top_3[0]
+        tp_4, tn_4, fp_4, fn_4 = top_4[1], 0, 0, top_4[0]
+        tp_5, tn_5, fp_5, fn_5 = top_5[1], 0, 0, top_5[0]
 
-        metrics['recall']['top1'] /= len(cities[1:])
-        metrics['recall']['top3'] /= len(cities[1:])
-        metrics['recall']['top4'] /= len(cities[1:])
-        metrics['recall']['top5'] /= len(cities[1:])
-
-        metrics['precision']['top1'] /= len(cities[1:])
-        metrics['precision']['top3'] /= len(cities[1:])
-        metrics['precision']['top4'] /= len(cities[1:])
-        metrics['precision']['top5'] /= len(cities[1:])
-
-        final_data = {
-            'Accuracy': [
-                metrics['accuracy']['top1'],
-                metrics['accuracy']['top3'],
-                metrics['accuracy']['top4'],
-                metrics['accuracy']['top5'],
+        tptn_dict = {
+            "Top-N": ["Top 1", "Top 3", "Top 4", "Top 5"],
+            "Accuracy": [
+                round(((tp_1 + tn_1) / (tp_1 + fn_1 + fp_1 + tn_1)) * 100, 2),
+                round(((tp_3 + tn_3) / (tp_3 + fn_3 + fp_3 + tn_3)) * 100, 2),
+                round(((tp_4 + tn_4) / (tp_4 + fn_4 + fp_4 + tn_4)) * 100, 2),
+                round(((tp_5 + tn_5) / (tp_5 + fn_5 + fp_5 + tn_5)) * 100, 2),
             ],
-            'Recall': [
-                metrics['recall']['top1'],
-                metrics['recall']['top3'],
-                metrics['recall']['top4'],
-                metrics['recall']['top5'],
+            "Recall": [
+                round((tp_1 / (tp_1 + fn_1)) * 100, 2),
+                round((tp_3 / (tp_3 + fn_3)) * 100, 2),
+                round((tp_4 / (tp_4 + fn_4)) * 100, 2),
+                round((tp_5 / (tp_5 + fn_5)) * 100, 2),
             ],
-            'Precision': [
-                metrics['precision']['top1'],
-                metrics['precision']['top3'],
-                metrics['precision']['top4'],
-                metrics['precision']['top5'],
-            ],
+            "Precision": [
+                round((tp_1 / (tp_1 + fp_1)) * 100, 2),
+                round((tp_3 / (tp_3 + fp_3)) * 100, 2),
+                round((tp_4 / (tp_4 + fp_4)) * 100, 2),
+                round((tp_5 / (tp_5 + fp_5)) * 100, 2),
+            ]
         }
 
-        st.write('### Rata-rata Top-N Accuracy, Precision, Recall')
-        eval_df = pd.DataFrame(data=final_data, index=_metrics['index'])
-        
-        st.dataframe(eval_df[['Accuracy', 'Recall', 'Precision']].applymap(lambda x: f'{x*100:.1f}%'), use_container_width=True)
+        st.write('#### Tabel Confusion Matrix')
+        tptn_df = pd.DataFrame.from_dict(tptn_dict).set_index("Top-N")
+        st.dataframe(tptn_df, use_container_width=True)
 
         fig = plt.figure(figsize=(10, 6))
-        eval_melted = eval_df.reset_index().melt(id_vars="index", var_name="metric", value_name="percentage")
-        ax = sns.barplot(data=eval_melted, x="index", y="percentage", hue="metric")
+        eval_melted = tptn_df.reset_index().melt(id_vars="Top-N", var_name="metric", value_name="percentage")
+        ax = sns.barplot(data=eval_melted, x="Top-N", y="percentage", hue="metric")
         plt.gca().yaxis.set_major_formatter(PercentFormatter(1.0))
-        plt.title("\nHasil Rekomendasi Sistem dan Data Dinas Pertanian Kab. Sikka\n")
+        plt.title("\nGrafik Confusion Matrix\n")
 
-        top_n_ticks = eval_melted["index"].unique()
-        for tick in top_n_ticks:
-            subset = eval_melted[eval_melted["index"] == tick]
-            max_percentage = subset["percentage"].max()
+        for p in ax.patches:
+            height = p.get_height()
+            if height == 0:
+                continue
             ax.text(
-                x=subset["index"].iloc[0], 
-                y=max_percentage + 0.0035,  # Adjust y position for clarity
-                s='{:.1f}%'.format(max_percentage * 100),
+                p.get_x() + p.get_width() / 2.0,
+                height + 1.5,
+                '{:.1f}%'.format(height),
                 ha="center"
             )
+
+        # top_n_ticks = eval_melted["Top-N"].unique()
+        # for tick in top_n_ticks:
+        #     subset = eval_melted[eval_melted["Top-N"] == tick]
+        #     max_percentage = subset["percentage"].max()
+        #     ax.text(
+        #         x=subset["Top-N"].iloc[0], 
+        #         y=max_percentage + 0.0035,  # Adjust y position for clarity
+        #         s='{:.1f}%'.format(max_percentage * 100),
+        #         ha="center"
+        #     )
             
         st.pyplot(fig)
 
+
+        
+        # st.write(map(lambda x: "TP" if x == "1" else "FN", Counter(tptn_table['Acc_Top1'])))
+
+        # # metrics = {'accuracy': 0, 'recall': 0, 'precision': 0}
+        # metrics = {
+        #     'accuracy': {
+        #         'top1': 0,
+        #         'top3': 0,
+        #         'top4': 0,
+        #         'top5': 0,
+        #     },
+        #     'recall': {
+        #         'top1': 0,
+        #         'top3': 0,
+        #         'top4': 0,
+        #         'top5': 0,
+        #     },
+        #     'precision': {
+        #         'top1': 0,
+        #         'top3': 0,
+        #         'top4': 0,
+        #         'top5': 0,
+        #     }
+        # }
+        # dfs = []
+        # for city in cities[1:]:
+        #     _metrics = calculate_metrics(pair_grt_pred[city])
+        #     # dfs.append({"city": city, "df": pd.DataFrame(data=_metrics['data'], index=_metrics['index'])})
+        #     dfs.append({
+        #         "lahan": city,
+        #         "Acc_Top1": _metrics['data']['Accuracy'][0],
+        #         "Acc_Top3": _metrics['data']['Accuracy'][1],
+        #         "Acc_Top4": _metrics['data']['Accuracy'][2],
+        #         "Acc_Top5": _metrics['data']['Accuracy'][3],
+        #         "Prec_Top1": _metrics['data']['Precision'][0],
+        #         "Prec_Top3": _metrics['data']['Precision'][1],
+        #         "Prec_Top4": _metrics['data']['Precision'][2],
+        #         "Prec_Top5": _metrics['data']['Precision'][3],
+        #         "Rec_Top1": _metrics['data']['Recall'][0],
+        #         "Rec_Top3": _metrics['data']['Recall'][1],
+        #         "Rec_Top4": _metrics['data']['Recall'][2],
+        #         "Rec_Top5": _metrics['data']['Recall'][3],
+        #     })
+            
+        #     metrics['accuracy']['top1'] += _metrics['data']['Accuracy'][0]
+        #     metrics['accuracy']['top3'] += _metrics['data']['Accuracy'][1]
+        #     metrics['accuracy']['top4'] += _metrics['data']['Accuracy'][2]
+        #     metrics['accuracy']['top5'] += _metrics['data']['Accuracy'][3]
+
+        #     metrics['recall']['top1'] += _metrics['data']['Recall'][0]
+        #     metrics['recall']['top3'] += _metrics['data']['Recall'][1]
+        #     metrics['recall']['top4'] += _metrics['data']['Recall'][2]
+        #     metrics['recall']['top5'] += _metrics['data']['Recall'][3]
+
+        #     metrics['precision']['top1'] += _metrics['data']['Precision'][0]
+        #     metrics['precision']['top3'] += _metrics['data']['Precision'][1]
+        #     metrics['precision']['top4'] += _metrics['data']['Precision'][2]
+        #     metrics['precision']['top5'] += _metrics['data']['Precision'][3]
+
+        # metrics['accuracy']['top1'] /= len(cities[1:])
+        # metrics['accuracy']['top3'] /= len(cities[1:])
+        # metrics['accuracy']['top4'] /= len(cities[1:])
+        # metrics['accuracy']['top5'] /= len(cities[1:])
+
+        # metrics['recall']['top1'] /= len(cities[1:])
+        # metrics['recall']['top3'] /= len(cities[1:])
+        # metrics['recall']['top4'] /= len(cities[1:])
+        # metrics['recall']['top5'] /= len(cities[1:])
+
+        # metrics['precision']['top1'] /= len(cities[1:])
+        # metrics['precision']['top3'] /= len(cities[1:])
+        # metrics['precision']['top4'] /= len(cities[1:])
+        # metrics['precision']['top5'] /= len(cities[1:])
+
+        # final_data = {
+        #     'Accuracy': [
+        #         metrics['accuracy']['top1'],
+        #         metrics['accuracy']['top3'],
+        #         metrics['accuracy']['top4'],
+        #         metrics['accuracy']['top5'],
+        #     ],
+        #     'Recall': [
+        #         metrics['recall']['top1'],
+        #         metrics['recall']['top3'],
+        #         metrics['recall']['top4'],
+        #         metrics['recall']['top5'],
+        #     ],
+        #     'Precision': [
+        #         metrics['precision']['top1'],
+        #         metrics['precision']['top3'],
+        #         metrics['precision']['top4'],
+        #         metrics['precision']['top5'],
+        #     ],
+        # }
+
+        # st.write('### Tabel Confusion Matrix')
+        # eval_df = pd.DataFrame(data=final_data, index=_metrics['index'])
+        
+        # st.dataframe(eval_df[['Accuracy', 'Recall', 'Precision']].applymap(lambda x: f'{x*100:.1f}%'), use_container_width=True)
+
+        # fig = plt.figure(figsize=(10, 6))
+        # eval_melted = eval_df.reset_index().melt(id_vars="index", var_name="metric", value_name="percentage")
+        # ax = sns.barplot(data=eval_melted, x="index", y="percentage", hue="metric")
+        # plt.gca().yaxis.set_major_formatter(PercentFormatter(1.0))
+        # plt.title("\nGrafik Confusion Matrix\n")
+
+        # top_n_ticks = eval_melted["index"].unique()
+        # for tick in top_n_ticks:
+        #     subset = eval_melted[eval_melted["index"] == tick]
+        #     max_percentage = subset["percentage"].max()
+        #     ax.text(
+        #         x=subset["index"].iloc[0], 
+        #         y=max_percentage + 0.0035,  # Adjust y position for clarity
+        #         s='{:.1f}%'.format(max_percentage * 100),
+        #         ha="center"
+        #     )
+            
+        # st.pyplot(fig)
+
         st.write('#### Detil Top-N Accuracy, Precision, Recall per Lahan')
-        st.dataframe(pd.DataFrame(data=dfs), use_container_width=True)
+        st.dataframe(result_lahan, use_container_width=True)
         
     else:
         data = pair_grt_pred[eval_city]

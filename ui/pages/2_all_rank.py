@@ -227,14 +227,14 @@ final_data = {
     ],
 }
 
-st.write('### Grafik Perbandingan Metrik Sistem')
+# st.write('### Grafik Perbandingan Metrik Sistem')
 eval_df = pd.DataFrame(data=final_data, index=_metrics['index'])
 
 fig = plt.figure(figsize=(10, 6))
 eval_melted = eval_df.reset_index().melt(id_vars="index", var_name="metric", value_name="percentage")
 ax = sns.barplot(data=eval_melted, x="index", y="percentage", hue="metric")
 plt.gca().yaxis.set_major_formatter(PercentFormatter(1.0))
-plt.title("\nHasil Rekomendasi Sistem dan Data Dinas Pertanian Kab. Sikka\n")
+plt.title("\nGrafik Hasil Perbandingan Rekomendasi Sistem dan Data Dinas Pertanian Kab. Sikka\n")
 
 top_n_ticks = eval_melted["index"].unique()
 for tick in top_n_ticks:
